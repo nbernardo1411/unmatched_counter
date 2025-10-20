@@ -16,6 +16,7 @@ export class LifeCounterComponent implements OnInit, OnDestroy {
 
   @HostBinding('style.backgroundImage') backgroundImage = '';
   private readonly defaultBackground = 'assets/backgrounds/unmatched.webp';
+  private lastBackgroundObjectUrl: string | null = null;
 
   constructor(private characterService: CharacterService) {}
 
@@ -27,8 +28,24 @@ export class LifeCounterComponent implements OnInit, OnDestroy {
       .subscribe(c => {
         this.selected = c;
         if (c && c.background) {
-          // probe for webp/png/jpg like background manager
           const base = c.background;
+
+          // If background is already a blob/object URL or data URL, set immediately
+          if (base.startsWith('blob:') || base.startsWith('data:') || base.startsWith('http')) {
+            // revoke previous object URL if different
+            if (this.lastBackgroundObjectUrl && this.lastBackgroundObjectUrl !== base) {
+              try { URL.revokeObjectURL(this.lastBackgroundObjectUrl); } catch { /* ignore */ }
+              this.lastBackgroundObjectUrl = null;
+            }
+            this.backgroundImage = `url('${base}')`;
+            // still probe for webp/png/jpg versions only if the base looks like an asset path
+            const extMatch = base.match(/(.*)\.(png|jpg|jpeg)$/i);
+            if (!extMatch) return;
+          }
+
+          // If we reach here, probe candidates (but set base immediately for UX)
+          this.backgroundImage = `url('${base}')`;
+
           const extMatch = base.match(/(.*)\.(png|jpg|jpeg)$/i);
           const candidates: string[] = [];
           if (extMatch) {
@@ -38,19 +55,24 @@ export class LifeCounterComponent implements OnInit, OnDestroy {
             candidates.push(base);
           }
 
-          const probe = (idx: number) => {
-            if (idx >= candidates.length) {
-              this.backgroundImage = `url('${base}')`;
-              return;
-            }
-            const url = candidates[idx];
-            const img = new Image();
-            img.onload = () => this.backgroundImage = `url('${url}')`;
-            img.onerror = () => probe(idx + 1);
-            img.src = url;
-          };
-
-          probe(0);
+          // async probe to avoid blocking UI
+          setTimeout(() => {
+            const probe = (idx: number) => {
+              if (idx >= candidates.length) return;
+              const url = candidates[idx];
+              const img = new Image();
+              img.onload = () => {
+                // only replace if different
+                const current = (this.backgroundImage as string) || '';
+                if (!current.includes(url)) {
+                  this.backgroundImage = `url('${url}')`;
+                }
+              };
+              img.onerror = () => probe(idx + 1);
+              img.src = url;
+            };
+            probe(0);
+          }, 0);
         } else {
           this.backgroundImage = `url('${this.defaultBackground}')`;
         }

@@ -92,19 +92,27 @@ export class BackgroundManagerComponent implements OnInit, OnDestroy, OnChanges 
       candidates.push(base);
     }
 
-    // sequentially probe candidates and set the first that loads
-    const probe = (idx: number) => {
-      if (idx >= candidates.length) {
-        this.bgStyle = { 'background-image': `url('${base}')` };
-        return;
-      }
-      const url = candidates[idx];
-      const img = new Image();
-      img.onload = () => this.bgStyle = { 'background-image': `url('${url}')` };
-      img.onerror = () => probe(idx + 1);
-      img.src = url;
-    };
+    // Immediately set the base background so the UI updates without delay,
+    // then probe higher-efficiency formats (webp) in the background and replace if available.
+    this.bgStyle = { 'background-image': `url('${base}')` };
 
-    probe(0);
+    // asynchronous probe
+    setTimeout(() => {
+      const probe = (idx: number) => {
+        if (idx >= candidates.length) return;
+        const url = candidates[idx];
+        const img = new Image();
+        img.onload = () => {
+          // only replace if the URL actually differs from current style
+          const current = (this.bgStyle as any)['background-image'] as string;
+          if (!current || !current.includes(url)) {
+            this.bgStyle = { 'background-image': `url('${url}')` };
+          }
+        };
+        img.onerror = () => probe(idx + 1);
+        img.src = url;
+      };
+      probe(0);
+    }, 0);
   }
 }

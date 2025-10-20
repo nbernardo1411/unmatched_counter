@@ -19,6 +19,8 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
   formHp = 10;
   formBackground: string | null = null; // data URL for uploaded background image
   formBackgroundLoading = false;
+  formBackgroundPreview: string | null = null; // fast object URL preview while processing
+  private lastFormBackgroundUrl: string | null = null;
 
   // dynamic lists
   sidekicks: { name: string; health: number }[] = [];
@@ -70,6 +72,10 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
   onBackgroundFileChange(evt: Event): void {
     const input = evt.target as HTMLInputElement;
     if (!input.files || input.files.length === 0) {
+      if (this.lastFormBackgroundUrl) {
+        try { URL.revokeObjectURL(this.lastFormBackgroundUrl); } catch { /* ignore */ }
+        this.lastFormBackgroundUrl = null;
+      }
       this.formBackground = null;
       return;
     }
@@ -81,15 +87,38 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
     // show loading indicator
     this.formBackgroundLoading = true;
 
-    this.resizeImageFileToDataURL(file, MAX_DIMENSION, QUALITY)
-      .then(dataUrl => {
-        this.formBackground = dataUrl;
-      })
-      .catch(err => {
+    // immediate preview using an object URL so the user sees the image right away
+    try {
+      const previewUrl = URL.createObjectURL(file);
+      this.formBackground = previewUrl;
+      this.formBackgroundPreview = previewUrl;
+      this.lastFormBackgroundUrl = previewUrl;
+    } catch (e) {
+      // if object URLs are not available, continue to processing fallback
+      console.warn('object URL preview not available', e);
+    }
+
+    // process image asynchronously (non-blocking) and replace preview with compressed blob URL
+    this.processImageFileToBlobUrl(file, MAX_DIMENSION, QUALITY)
+      .then(finalUrl => {
+        // revoke previous preview URL if it was an object URL and different
+        if (this.formBackgroundPreview && this.formBackgroundPreview !== finalUrl) {
+          try { URL.revokeObjectURL(this.formBackgroundPreview); } catch { /* ignore */ }
+        }
+        this.formBackgroundPreview = null;
+        this.formBackground = finalUrl;
+        this.lastFormBackgroundUrl = finalUrl;
+  })
+  .catch((err: any) => {
         console.error('Image processing failed', err);
-        // fallback: try to read raw file
+        // fallback: read raw file as data URL (this may be slower but works)
         const reader = new FileReader();
-        reader.onload = () => this.formBackground = reader.result as string;
+        reader.onload = () => {
+          // revoke previous object URLs to avoid leaks
+          if (this.lastFormBackgroundUrl) try { URL.revokeObjectURL(this.lastFormBackgroundUrl); } catch {}
+          this.lastFormBackgroundUrl = null;
+          this.formBackground = reader.result as string;
+        };
         reader.readAsDataURL(file);
       })
       .finally(() => {
@@ -99,37 +128,107 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
 
   // Resize & compress an image File to a JPEG data URL (returns Promise<string>)
   private resizeImageFileToDataURL(file: File, maxDim: number, quality = 0.8): Promise<string> {
+    // keep original method for compatibility but prefer processImageFileToBlobUrl
+    return this.processImageFileToBlobUrl(file, maxDim, quality).then(blobUrl => {
+      // Convert blob URL back to data URL only if caller expects string data URL
+      return new Promise<string>((resolve, reject) => {
+        fetch(blobUrl)
+          .then(r => r.blob())
+          .then(blob => {
+            const fr = new FileReader();
+            fr.onload = () => resolve(fr.result as string);
+            fr.onerror = reject;
+            fr.readAsDataURL(blob);
+          })
+          .catch(reject);
+      });
+    });
+  }
+
+  // Process image file using createImageBitmap + canvas.toBlob (async) and return a blob: URL
+  private processImageFileToBlobUrl(file: File, maxDim: number, quality = 0.8): Promise<string> {
     return new Promise((resolve, reject) => {
-      const img = new Image();
-
-      // Read file as data URL first
-      const reader = new FileReader();
-      reader.onerror = err => reject(err);
-      reader.onload = () => {
-        img.onload = () => {
-          try {
-            const ratio = Math.min(1, maxDim / Math.max(img.width, img.height));
-            const w = Math.round(img.width * ratio);
-            const h = Math.round(img.height * ratio);
-            const canvas = document.createElement('canvas');
-            canvas.width = w;
-            canvas.height = h;
-            const ctx = canvas.getContext('2d');
-            if (!ctx) throw new Error('Canvas 2D context not available');
-            // draw the image into the canvas (this will drop alpha if outputting JPEG)
-            ctx.drawImage(img, 0, 0, w, h);
-
-            // Always encode as JPEG to get good compression (if original had transparency it's lost)
-            const output = canvas.toDataURL('image/jpeg', quality);
-            resolve(output);
-          } catch (e) {
-            reject(e);
-          }
-        };
-        img.onerror = err => reject(err);
-        img.src = reader.result as string;
+      const finishWithBlob = (canvas: HTMLCanvasElement) => {
+        canvas.toBlob(blob => {
+          if (!blob) return reject(new Error('Canvas toBlob returned null'));
+          const url = URL.createObjectURL(blob);
+          resolve(url);
+        }, 'image/jpeg', quality);
       };
-      reader.readAsDataURL(file);
+
+      // Prefer createImageBitmap which may decode off the main thread
+      if ((window as any).createImageBitmap) {
+        (window as any).createImageBitmap(file)
+          .then((imgBitmap: any) => {
+            try {
+              const ratio = Math.min(1, maxDim / Math.max(imgBitmap.width, imgBitmap.height));
+              const w = Math.round(imgBitmap.width * ratio);
+              const h = Math.round(imgBitmap.height * ratio);
+              const canvas = document.createElement('canvas');
+              canvas.width = w;
+              canvas.height = h;
+              const ctx = canvas.getContext('2d');
+              if (!ctx) throw new Error('Canvas 2D context not available');
+              ctx.drawImage(imgBitmap, 0, 0, w, h);
+              finishWithBlob(canvas);
+            } catch (e) {
+                reject(e);
+              }
+              })
+              .catch((err: any) => {
+            // fallback to FileReader + Image path
+            const reader = new FileReader();
+            reader.onerror = e => reject(e);
+            reader.onload = () => {
+              const img = new Image();
+              img.onload = () => {
+                try {
+                  const ratio = Math.min(1, maxDim / Math.max(img.width, img.height));
+                  const w = Math.round(img.width * ratio);
+                  const h = Math.round(img.height * ratio);
+                  const canvas = document.createElement('canvas');
+                  canvas.width = w;
+                  canvas.height = h;
+                  const ctx = canvas.getContext('2d');
+                  if (!ctx) throw new Error('Canvas 2D context not available');
+                  ctx.drawImage(img, 0, 0, w, h);
+                  finishWithBlob(canvas);
+                } catch (e) {
+                  reject(e);
+                }
+              };
+              img.onerror = e => reject(e);
+              img.src = reader.result as string;
+            };
+            reader.readAsDataURL(file);
+          });
+      } else {
+        // no createImageBitmap: fallback to FileReader + Image
+        const reader = new FileReader();
+        reader.onerror = e => reject(e);
+        reader.onload = () => {
+          const img = new Image();
+          img.onload = () => {
+            try {
+              const ratio = Math.min(1, maxDim / Math.max(img.width, img.height));
+              const w = Math.round(img.width * ratio);
+              const h = Math.round(img.height * ratio);
+              const canvas = document.createElement('canvas');
+              canvas.width = w;
+              canvas.height = h;
+              const ctx = canvas.getContext('2d');
+              if (!ctx) throw new Error('Canvas 2D context not available');
+              ctx.drawImage(img, 0, 0, w, h);
+              finishWithBlob(canvas);
+            } catch (e) {
+              reject(e);
+            }
+          };
+          img.onerror = e => reject(e);
+          img.src = reader.result as string;
+        };
+        reader.readAsDataURL(file);
+      }
     });
   }
 
