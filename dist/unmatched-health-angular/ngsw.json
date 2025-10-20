@@ -1,0 +1,113 @@
+{
+  "configVersion": 1,
+  "timestamp": 1760854304840,
+  "index": "/index.html",
+  "assetGroups": [
+    {
+      "name": "app",
+      "installMode": "prefetch",
+      "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "urls": [
+        "/index.html",
+        "/main.05a89f7215fa225d.js",
+        "/manifest.webmanifest",
+        "/polyfills.58d8794598fd6636.js",
+        "/runtime.1b3d28c17f33a8aa.js",
+        "/styles.1635ec402e72cae6.css"
+      ],
+      "patterns": []
+    },
+    {
+      "name": "assets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "urls": [
+        "/assets/backgrounds/alice.png",
+        "/assets/backgrounds/bigfoot.png",
+        "/assets/backgrounds/bruce-lee.webp",
+        "/assets/backgrounds/dracula.webp",
+        "/assets/backgrounds/golden-bat.webp",
+        "/assets/backgrounds/ingen-raptors.webp",
+        "/assets/backgrounds/invisible-man.png",
+        "/assets/backgrounds/jekyll-hyde.webp",
+        "/assets/backgrounds/king-arthur.png",
+        "/assets/backgrounds/medusa.png",
+        "/assets/backgrounds/nikola-tesla.webp",
+        "/assets/backgrounds/robin-hood.png",
+        "/assets/backgrounds/sherlock.png",
+        "/assets/backgrounds/sinbad.png",
+        "/assets/backgrounds/t-rex.webp",
+        "/assets/backgrounds/unmatched.webp",
+        "/assets/backgrounds/witcher.png",
+        "/assets/icons/icon-128x128.png",
+        "/assets/icons/icon-144x144.png",
+        "/assets/icons/icon-152x152.png",
+        "/assets/icons/icon-192x192.png",
+        "/assets/icons/icon-384x384.png",
+        "/assets/icons/icon-512x512.png",
+        "/assets/icons/icon-72x72.png",
+        "/assets/icons/icon-96x96.png"
+      ],
+      "patterns": []
+    }
+  ],
+  "dataGroups": [],
+  "hashTable": {
+    "/assets/backgrounds/alice.png": "b1f97c54634a29cdbf0897c7e1c80be7d11b94eb",
+    "/assets/backgrounds/bigfoot.png": "ce08a88d1cbe38df48b240177689945d431ba3d5",
+    "/assets/backgrounds/bruce-lee.webp": "4a4ff605f2be9d2182218417885f990a4faeae12",
+    "/assets/backgrounds/dracula.webp": "b114ccbbfbcf42fae3995e726acb3643493ad1a7",
+    "/assets/backgrounds/golden-bat.webp": "d293afb4118fe602db22135326489f227f2ab75f",
+    "/assets/backgrounds/ingen-raptors.webp": "915c870aadd4a6b5f46eba006e7a74b7d440a2b5",
+    "/assets/backgrounds/invisible-man.png": "c0c0e02eeae85b607eecdea01e659b2a52e6dde0",
+    "/assets/backgrounds/jekyll-hyde.webp": "95d2e04617220dffe897fc27203ff364f526a87a",
+    "/assets/backgrounds/king-arthur.png": "24bb72f0a2d149409596994ef6d759a36f55cc80",
+    "/assets/backgrounds/medusa.png": "982820ef65cd931e488343a59d0cd3b6d0dedd23",
+    "/assets/backgrounds/nikola-tesla.webp": "ee705eed7f025874cdcf724ad0ac5b86b079bd30",
+    "/assets/backgrounds/robin-hood.png": "7697b9f4182e39b702c2d3c5a5f7cb20b91736d0",
+    "/assets/backgrounds/sherlock.png": "19b8a41426e29e7fbeb2c1c0139a07863e2d9529",
+    "/assets/backgrounds/sinbad.png": "994a99777243a447f77694a1a4ef2b2d57ea4912",
+    "/assets/backgrounds/t-rex.webp": "c1778026d9d854e90c03f4442363d443bdcf2471",
+    "/assets/backgrounds/unmatched.webp": "2d006715fa7cebe2dae6a31928c577715877b556",
+    "/assets/backgrounds/witcher.png": "ab4a14e9c500eac0b0691cdb84ade6d0f1f9083b",
+    "/assets/icons/icon-128x128.png": "dae3b6ed49bdaf4327b92531d4b5b4a5d30c7532",
+    "/assets/icons/icon-144x144.png": "b0bd89982e08f9bd2b642928f5391915b74799a7",
+    "/assets/icons/icon-152x152.png": "7479a9477815dfd9668d60f8b3b2fba709b91310",
+    "/assets/icons/icon-192x192.png": "1abd80d431a237a853ce38147d8c63752f10933b",
+    "/assets/icons/icon-384x384.png": "329749cd6393768d3131ed6304c136b1ca05f2fd",
+    "/assets/icons/icon-512x512.png": "559d9c4318b45a1f2b10596bbb4c960fe521dbcc",
+    "/assets/icons/icon-72x72.png": "c457e56089a36952cd67156f9996bc4ce54a5ed9",
+    "/assets/icons/icon-96x96.png": "3914125a4b445bf111c5627875fc190f560daa41",
+    "/index.html": "6b1dc93441e3bfebe85d5e7b56872707acde3898",
+    "/main.05a89f7215fa225d.js": "cc8f042a76fdf31d973a8700547c9d237f1c5fbe",
+    "/manifest.webmanifest": "4ed7e18b580ba3b4ddba5b1d6844cbedf50e17e8",
+    "/polyfills.58d8794598fd6636.js": "c235c2dc26c1d7334478520a862203227f383a7d",
+    "/runtime.1b3d28c17f33a8aa.js": "9ae72fcc91d21e4f5be14ff76471b43ac15a0c48",
+    "/styles.1635ec402e72cae6.css": "054cde05a7f5014ee030ad2d9541b1302fde52a5"
+  },
+  "navigationUrls": [
+    {
+      "positive": true,
+      "regex": "^\\/.*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*\\.[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*\\/.*$"
+    }
+  ],
+  "navigationRequestStrategy": "performance"
+}

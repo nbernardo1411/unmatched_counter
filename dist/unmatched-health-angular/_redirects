@@ -1,0 +1,5 @@
+/ngsw-worker.js  /ngsw-worker.js  200
+/ngsw.json        /ngsw.json        200
+/manifest.webmanifest  /manifest.webmanifest  200
+/assets/*         /assets/:splat    200
+/*                /index.html      200

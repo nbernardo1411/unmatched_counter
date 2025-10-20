@@ -1,0 +1,33 @@
+<div class="select-wrapper" role="region" aria-label="Character selector">
+  <label class="select-label" for="character-select">Character</label>
+
+  <div class="select-field">
+    <select id="character-select"
+            class="character-select"
+            [value]="selectedName"
+            (change)="selectByName($event.target.value)"
+            aria-label="Select character">
+      <option value="">Select character</option>
+      <option *ngFor="let character of characters; trackBy: trackByName" [value]="character.name">
+        {{ character.name }}
+      </option>
+    </select>
+
+    <span class="select-decor" aria-hidden="true"></span>
+  </div>
+
+  <p class="select-hint" *ngIf="!selectedName">Choose a character to show health, sidekicks and background.</p>
+  <div class="create-toggle">
+    <button class="button small" (click)="toggleCreate()">{{ showCreate ? 'Cancel' : 'Create custom' }}</button>
+  </div>
+
+  <div class="create-form" *ngIf="showCreate">
+    <label> Name <input type="text" [(ngModel)]="formName" /> </label>
+    <label> HP <input type="number" [(ngModel)]="formHp" min="0" /> </label>
+    <label> Sidekicks (comma, Name:HP) <input type="text" [(ngModel)]="formSidekicks" placeholder="Hawk:2, Dog:1" /> </label>
+    <label> Unique type <input type="text" [(ngModel)]="formUniqueType" placeholder="Conductor" /> </label>
+    <label> Unique start <input type="number" [(ngModel)]="formUniqueStart" min="0" /> </label>
+    <label> Unique max <input type="number" [(ngModel)]="formUniqueMax" min="0" /> </label>
+    <div class="actions"><button class="button" (click)="createCustom()">Create</button></div>
+  </div>
+</div>

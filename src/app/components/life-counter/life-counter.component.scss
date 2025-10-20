@@ -1,0 +1,77 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background-size: cover;
+  background-position: center;
+  transition: background 300ms ease-in-out;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.overlay {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.76), rgba(0, 0, 0, 0.788));
+  padding: 24px;
+  border-radius: 12px;
+  color: #fff;
+  max-width: 980px;
+  margin: 24px auto;
+}
+
+.characters-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.char-btn {
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform .12s ease, background .12s ease;
+}
+.char-btn:hover { transform: translateY(-3px); background: rgba(255,255,255,0.12); }
+
+.health-container {
+  display: block;
+  padding: 16px;
+  border-radius: 10px;
+  background: rgba(0,0,0,0.45);
+}
+
+.main-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.title { font-size: 1.6rem; font-weight: 600; }
+.health-points { font-size: 2.4rem; color: #ffcc00; font-weight: 700; }
+
+.sidekicks { margin-top: 12px; }
+.sidekick {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-top: 1px dashed rgba(255,255,255,0.06);
+}
+.sk-name { flex: 1; }
+.sk-health { width: 48px; text-align: center; color: #ffd54f; font-weight: 700; }
+
+.button {
+  background-color: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  margin: 0 4px;
+  transition: transform .08s;
+}
+.button:hover { transform: translateY(-2px); }
+.hint { text-align: center; margin-top: 18px; opacity: .9; }
