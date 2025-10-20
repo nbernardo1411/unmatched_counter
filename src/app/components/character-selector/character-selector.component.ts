@@ -1,11 +1,11 @@
-// app-character-selector.component.ts
 import { Component } from '@angular/core';
-import { CharacterService } from '../services/character.service';
-import { Character } from '../models/character.model';
+import { Character, UniqueCounter } from '../../models/character.model'; // fixed
+import { CharacterService } from '../../services/character.service';     // fixed
 
 @Component({
   selector: 'app-character-selector',
-  templateUrl: './app-character-selector.component.html',
+  templateUrl: './character-selector.component.html', // fixed
+  styleUrls: ['./character-selector.component.css']
 })
 export class CharacterSelectorComponent {
   characters: Character[] = [];
