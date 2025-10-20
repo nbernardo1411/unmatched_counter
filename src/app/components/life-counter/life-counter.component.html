@@ -9,8 +9,8 @@
       <div class="title">{{ selected.name }}</div>
       <div class="health-points">{{ selected.health }}</div>
       <div class="controls">
-        <button class="button" (click)="inc(selected)">+1</button>
         <button class="button" (click)="dec(selected)">-1</button>
+        <button class="button" (click)="inc(selected)">+1</button>
       </div>
     </div>
 
@@ -20,8 +20,8 @@
         <div class="sk-name">{{ sk.name }}</div>
         <div class="sk-health">{{ sk.health }}</div>
         <div class="controls">
-          <button class="button" (click)="incSide(selected.name, i)">+1</button>
           <button class="button" (click)="decSide(selected.name, i)">-1</button>
+          <button class="button" (click)="incSide(selected.name, i)">+1</button>
         </div>
       </div>
     </div>
@@ -30,8 +30,8 @@
       <h3>{{ selected.uniqueCounter.type }}</h3>
       <div class="sk-health">{{ selected.uniqueCounter.value ?? selected.uniqueCounter.start }}</div>
       <div class="controls">
-        <button class="button" (click)="incCounter()">+1</button>
         <button class="button" (click)="decCounter()">-1</button>
+        <button class="button" (click)="incCounter()">+1</button>
       </div>
     </div>
   </div>
