@@ -51,7 +51,7 @@ export class CharacterService {
           { name: 'Red Rider #3', health: 1 },
           { name: 'Red Rider #4', health: 1 }
         ], background: 'assets/backgrounds/witcher.png'},
-      { name: 'Ancient Leshen', health: 13, sidekicks: [{ name: 'Wolf #1', health: 1 }, { name: 'Wolf #2', health: 1 }], background: 'assets/backgrounds/witcher.png', uniqueCounter: { type: 'Wolves', start: 0, max: 2} },
+      { name: 'Ancient Leshen', health: 13, sidekicks: [{ name: 'Wolf #1', health: 1 }, { name: 'Wolf #2', health: 1 }], background: 'assets/backgrounds/witcher.png'},
   ];
 
   constructor() {
