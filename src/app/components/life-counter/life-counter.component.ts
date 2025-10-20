@@ -93,7 +93,4 @@ export class LifeCounterComponent implements OnInit, OnDestroy {
     if (!this.selected) return;
     this.characterService.adjustUniqueCounter(this.selected.name, -1);
   }
-  onEnrageToggle(ch: Character): void {
-    this.characterService.toggleEnrage(ch);
-  }
 }
