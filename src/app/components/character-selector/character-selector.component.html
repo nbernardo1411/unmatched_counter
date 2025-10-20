@@ -1,67 +1,50 @@
-<div class="select-wrapper" role="region" aria-label="Character selector">
-  <label class="select-label" for="character-select">Character</label>
+<div class="container">
+  <h1>Unmatched — Life Tracker</h1>
 
-  <div class="select-field">
-    <select id="character-select"
-            class="character-select"
-            [value]="selectedName"
-            (change)="selectByName($event.target.value)"
-            aria-label="Select character">
-      <option value="">Select character</option>
-      <option *ngFor="let character of characters; trackBy: trackByName" [value]="character.name">
-        {{ character.name }}
-      </option>
-    </select>
+  <form>
+    <div class="form-group">
+      <label>Character</label>
+      <p-dropdown 
+        [options]="characterList"
+        [(ngModel)]="selectedCharacter"
+        placeholder="Select character"
+        optionLabel="name"
+        inputId="character"
+        name="character">
+      </p-dropdown>
+      <small>Choose a character to show health, sidekicks and background.</small>
+      <button pButton type="button" label="Cancel" class="p-button-text mt-2" (click)="resetForm()"></button>
+    </div>
 
-    <span class="select-decor" aria-hidden="true"></span>
-  </div>
+    <div class="form-group">
+      <label>Name</label>
+      <input type="text" pInputText [(ngModel)]="name" name="name" placeholder="Enter name" />
+    </div>
 
-  <p class="select-hint" *ngIf="!selectedName">
-    Choose a character to show health, sidekicks and background.
-  </p>
+    <div class="form-group">
+      <label>HP</label>
+      <input type="number" pInputText [(ngModel)]="hp" name="hp" />
+    </div>
 
-  <div class="create-toggle">
-    <button class="button small" (click)="toggleCreate()">
-      {{ showCreate ? 'Cancel' : 'Create custom' }}
-    </button>
-  </div>
-
-  <div class="create-form" *ngIf="showCreate">
-    <label> Name <input type="text" [(ngModel)]="formName" /> </label>
-    <label> HP <input type="number" [(ngModel)]="formHp" min="0" /> </label>
-
-    <!-- Sidekick Section -->
-    <div class="sidekick-section">
-      <label>Sidekicks</label>
-      <div *ngFor="let s of sidekicks; let i = index" class="sidekick-row">
-        <input type="text" placeholder="Name" [(ngModel)]="s.name" />
-        <input type="number" placeholder="HP" min="1" [(ngModel)]="s.health" />
-        <button type="button" class="button small danger" (click)="removeSidekick(i)">
-          Remove
-        </button>
+    <div class="section">
+      <h3>Sidekicks</h3>
+      <div *ngFor="let sidekick of sidekicks; let i = index" class="sidekick-group">
+        <input type="text" pInputText [(ngModel)]="sidekick.name" placeholder="№" name="sidekick{{i}}Name" />
+        <input type="number" pInputText [(ngModel)]="sidekick.hp" name="sidekick{{i}}Hp" />
+        <button pButton type="button" label="Remove" class="p-button-danger small-btn" (click)="removeSidekick(i)"></button>
       </div>
-      <button type="button" class="button small" (click)="addSidekick()">+ Add Sidekick</button>
+      <button pButton type="button" label="+ Add Sidekick" class="p-button-secondary small-btn full-width" (click)="addSidekick()"></button>
     </div>
 
-    <!-- add visible spacing between sections -->
-    <div class="section-separator"></div>
-
-    <!-- Unique Counter Section -->
-    <div class="unique-section">
-      <label>Unique Counters</label>
-      <div *ngFor="let u of uniqueCounters; let j = index" class="unique-row">
-        <input type="text" placeholder="Type" [(ngModel)]="u.type" />
-        <input type="number" placeholder="Start" min="0" [(ngModel)]="u.start" />
-        <input type="number" placeholder="Max" min="0" [(ngModel)]="u.max" />
-        <button type="button" class="button small danger" (click)="removeUniqueCounter(j)">
-          Remove
-        </button>
+    <div class="section">
+      <h3>Unique Counters</h3>
+      <div *ngFor="let counter of counters; let i = index" class="counter-group">
+        <input type="number" pInputText [(ngModel)]="counter.value" name="counter{{i}}" />
+        <button pButton type="button" label="Remove" class="p-button-danger small-btn" (click)="removeCounter(i)"></button>
       </div>
-      <button type="button" class="button small" (click)="addUniqueCounter()">+ Add Counter</button>
+      <button pButton type="button" label="+ Add Counter" class="p-button-secondary small-btn full-width" (click)="addCounter()"></button>
     </div>
 
-    <div class="actions">
-      <button class="button" (click)="createCustom()">Create</button>
-    </div>
-  </div>
+    <button pButton type="button" label="Create" class="p-button-success full-width mt-3" (click)="createCharacter()"></button>
+  </form>
 </div>
