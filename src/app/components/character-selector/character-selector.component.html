@@ -16,9 +16,14 @@
     <span class="select-decor" aria-hidden="true"></span>
   </div>
 
-  <p class="select-hint" *ngIf="!selectedName">Choose a character to show health, sidekicks and background.</p>
+  <p class="select-hint" *ngIf="!selectedName">
+    Choose a character to show health, sidekicks and background.
+  </p>
+
   <div class="create-toggle">
-    <button class="button small" (click)="toggleCreate()">{{ showCreate ? 'Cancel' : 'Create custom' }}</button>
+    <button class="button small" (click)="toggleCreate()">
+      {{ showCreate ? 'Cancel' : 'Create custom' }}
+    </button>
   </div>
 
   <div class="create-form" *ngIf="showCreate">
@@ -31,9 +36,13 @@
       <div *ngFor="let s of sidekicks; let i = index" class="sidekick-row">
         <input type="text" placeholder="Name" [(ngModel)]="s.name" />
         <input type="number" placeholder="HP" min="1" [(ngModel)]="s.health" />
-        <button type="button" class="button small danger" (click)="removeSidekick(i)">Remove</button>
+        <button type="button" class="button small danger" (click)="removeSidekick(i)">
+          Remove
+        </button>
       </div>
-      <button type="button" class="button small" (click)="addSidekick()">+ Add Sidekick</button>
+      <div class="sidekick-actions">
+        <button type="button" class="button small" (click)="addSidekick()">+ Add Sidekick</button>
+      </div>
     </div>
 
     <!-- Unique Counter Section -->
@@ -43,9 +52,13 @@
         <input type="text" placeholder="Type" [(ngModel)]="u.type" />
         <input type="number" placeholder="Start" min="0" [(ngModel)]="u.start" />
         <input type="number" placeholder="Max" min="0" [(ngModel)]="u.max" />
-        <button type="button" class="button small danger" (click)="removeUniqueCounter(j)">Remove</button>
+        <button type="button" class="button small danger" (click)="removeUniqueCounter(j)">
+          Remove
+        </button>
       </div>
-      <button type="button" class="button small" (click)="addUniqueCounter()">+ Add Counter</button>
+      <div class="unique-actions">
+        <button type="button" class="button small" (click)="addUniqueCounter()">+ Add Counter</button>
+      </div>
     </div>
 
     <div class="actions">
