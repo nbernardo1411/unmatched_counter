@@ -10,34 +10,38 @@ export class CharacterService {
     // Unmatched: Battle of Legends Vol. 1
     { name: 'King Arthur', health: 18, sidekicks: [{ name: 'Merlin', health: 7 }], background: 'assets/backgrounds/king-arthur.png' },
     { name: 'Medusa', health: 16, sidekicks: [
-        { name: 'Harpie #1', health: 1 },
-        { name: 'Harpie #2', health: 1 },
-        { name: 'Harpie #3', health: 1 },
+        { name: 'Harpie 1', health: 1 },
+        { name: 'Harpie 2', health: 1 },
+        { name: 'Harpie 3', health: 1 },
       ], background: 'assets/backgrounds/medusa.png' },
     { name: 'Sinbad', health: 15, sidekicks: [{ name: 'Porter', health: 6 }], background: 'assets/backgrounds/sinbad.png' },
     { name: 'Alice', health: 13, background: 'assets/backgrounds/alice.png' },
 
     // Unmatched: Robin Hood vs Bigfoot
     { name: 'Robin Hood', health: 14, sidekicks: [
-        { name: 'Outlaw #1', health: 6 },
-        { name: 'Outlaw #2', health: 6 },
-        { name: 'Outlaw #3', health: 6 },
-        { name: 'Outlaw #4', health: 6 },
+        { name: 'Outlaw 1', health: 1 },
+        { name: 'Outlaw 2', health: 1 },
+        { name: 'Outlaw 3', health: 1 },
+        { name: 'Outlaw 4', health: 1 },
       ], background: 'assets/backgrounds/robin-hood.png' },
     { name: 'Bigfoot', health: 16, sidekicks: [{ name: 'Jackalope', health: 6 }], background: 'assets/backgrounds/bigfoot.png' },
 
     // Unmatched: Cobble & Fog
     { name: 'Sherlock Holmes', health: 16, sidekicks: [{ name: 'Dr. Watson', health: 8 }], background: 'assets/backgrounds/sherlock.png' },
     { name: 'Dracula', health: 13, sidekicks: [
-        { name: 'Sister #1', health: 1 },
-        { name: 'Sister #2', health: 1 },
-        { name: 'Sister #3', health: 1 },
+        { name: 'Sister 1', health: 1 },
+        { name: 'Sister 2', health: 1 },
+        { name: 'Sister 3', health: 1 },
       ], background: 'assets/backgrounds/dracula.png' },
     { name: 'Invisible Man', health: 15, background: 'assets/backgrounds/invisible-man.png' },
     { name: 'Jekyll & Hyde', health: 16, background: 'assets/backgrounds/jekyll-hyde.png' },
       // Additional custom / promo characters
       { name: 'T. Rex', health: 27, background: 'assets/backgrounds/t-rex.png' },
-      { name: 'InGen Raptors', health: 14, sidekicks: [{ name: 'Raptor Pack', health: 14 }], background: 'assets/backgrounds/ingen-raptors.png' },
+      { name: 'Raptors', sidekicks: [ 
+        { name: 'Blue', health: 6 },
+        { name: 'Delta', health: 6 },
+        { name: 'Echo', health: 6 },
+      ], background: 'assets/backgrounds/ingen-raptors.png' },
       { name: 'Golden Bat', health: 18, background: 'assets/backgrounds/golden-bat.png' },
       { name: 'Bruce Lee', health: 14, background: 'assets/backgrounds/bruce-lee.png' },
       { name: 'Nikola Tesla', health: 16, background: 'assets/backgrounds/nikola-tesla.png', uniqueCounter: { type: 'Conductor', start: 3, max: 4, value: 3 } },
