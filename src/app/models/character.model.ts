@@ -14,5 +14,10 @@ export interface Character {
   sidekicks?: Character[];
   background?: string;
   uniqueCounter?: UniqueCounter;
-  hideHealth?: boolean; // optional flag to hide health display in UI
+
+  /** Whether this character can enter Enrage mode */
+  hasEnrage?: boolean;
+
+  /** Whether Enrage mode is currently active (runtime only) */
+  enraged?: boolean;
 }
