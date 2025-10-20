@@ -39,5 +39,18 @@
       </div>
     </div>
 
+        <!-- NEW: Enrage toggle -->
+    <div class="enrage-toggle" *ngIf="selected?.hasEnrage">
+      <h3>Enrage State</h3>
+      <label class="toggle">
+        <input
+          type="checkbox"
+          [(ngModel)]="selected.enraged"
+          (change)="onEnrageToggle(selected)"
+        />
+        <span>{{ selected.enraged ? 'Enraged' : 'Calm' }}</span>
+      </label>
+    </div>
+
   </div>
 </div>
