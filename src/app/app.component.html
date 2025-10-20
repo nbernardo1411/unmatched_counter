@@ -1,4 +1,46 @@
-<div>
-  <app-life-counter></app-life-counter>
-  <app-background-manager></app-background-manager>
-</div>
+<main class="app-main">
+    <app-life-counter></app-life-counter>
+    <app-background-manager></app-background-manager>
+  </main>
+
+  <!-- Floating User Guide FAB -->
+  <button class="user-guide-fab" aria-label="Open user guide" (click)="openGuide()">?</button>
+
+  <!-- User Guide Modal -->
+  <div class="user-guide-overlay" *ngIf="showGuide">
+    <div class="user-guide-modal">
+      <h2>User Guide</h2>
+      <section>
+        <h3>What this app is for</h3>
+        <p>
+          The Unmatched Health App tracks player health for the Unmatched board game. Use it to
+          add characters, monitor life totals, and switch backgrounds for each match.
+        </p>
+      </section>
+
+      <section>
+        <h3>Basic usage</h3>
+        <ol>
+          <li>Select a character from the character selector to add them to the match.</li>
+          <li>Use the life controls on each character card to increase or decrease health.</li>
+          <li>Change the background from the background manager to match the table or scenario.</li>
+          <li>Reset or remove characters as needed during play.</li>
+        </ol>
+      </section>
+
+      <section>
+        <h3>Creating a custom character</h3>
+        <p>
+          To create a custom character, open the character selector and look for the "Add" or
+          "Custom" option. Provide a name, starting health value. 
+          After saving, the new character will appear in the selector and can be added to
+          matches like any other character.
+        </p>
+      </section>
+
+      <footer class="guide-footer">
+        <small>Made by Zuki and TeamFhura</small>
+        <button (click)="closeGuide()">Close</button>
+      </footer>
+    </div>
+  </div>

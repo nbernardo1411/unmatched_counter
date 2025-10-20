@@ -1,4 +1,7 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, OnInit, OnDestroy } from '@angular/core';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { CharacterService } from '../../services/character.service';
 
 @Component({
   selector: 'app-background-manager',
@@ -17,7 +20,7 @@ import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
     }
   `]
 })
-export class BackgroundManagerComponent implements OnChanges {
+export class BackgroundManagerComponent implements OnInit, OnDestroy, OnChanges {
   @Input() selectedCharacter: string | null = null;
 
   backgroundImages: Record<string, string> = {
@@ -25,13 +28,14 @@ export class BackgroundManagerComponent implements OnChanges {
     'Medusa': 'assets/backgrounds/medusa.png',
     'Sinbad': 'assets/backgrounds/sinbad.png',
     'Alice': 'assets/backgrounds/alice.png',
+    'Winter Soldier': 'assets/backgrounds/winter-soldier.png',
+    // Robin Hood vs Bigfoot
     'Robin Hood': 'assets/backgrounds/robin-hood.png',
     'Bigfoot': 'assets/backgrounds/bigfoot.png',
     'Sherlock Holmes': 'assets/backgrounds/sherlock.png',
     'Dracula': 'assets/backgrounds/dracula.png',
     'Invisible Man': 'assets/backgrounds/invisible-man.png',
-    'Jekyll & Hyde': 'assets/backgrounds/jekyll-hyde.png'
-    ,
+    'Jekyll & Hyde': 'assets/backgrounds/jekyll-hyde.png',
     // custom/promo backgrounds
     'T. Rex': 'assets/backgrounds/t-rex.png',
     'InGen Raptors': 'assets/backgrounds/ingen-raptors.png',
@@ -44,8 +48,27 @@ export class BackgroundManagerComponent implements OnChanges {
 
   private readonly defaultBackground = 'assets/backgrounds/unmatched.webp';
 
+  private destroy$ = new Subject<void>();
+
+  constructor(private characterService: CharacterService) {}
+
+  ngOnInit(): void {
+    // Subscribe to selection so the background updates even when no parent binding is provided
+    this.characterService.selected$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(c => {
+        this.selectedCharacter = c ? (c as any).name : null;
+        this.updateBg();
+      });
+  }
+
   ngOnChanges(_: SimpleChanges): void {
     this.updateBg();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private updateBg(): void {

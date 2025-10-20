@@ -55,6 +55,12 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
   // toggle form visibility
   toggleCreate(): void {
     this.showCreate = !this.showCreate;
+    // When opening the create form, reset any existing selection so
+    // the UI doesn't show both the selected character and the create form.
+    if (this.showCreate) {
+      this.selectedName = null;
+      this.characterService.selectCharacterByName('');
+    }
   }
 
   // add a new sidekick

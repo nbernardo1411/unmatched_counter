@@ -16,6 +16,7 @@ export class CharacterService {
       ], background: 'assets/backgrounds/medusa.png' },
     { name: 'Sinbad', health: 15, sidekicks: [{ name: 'Porter', health: 6 }], background: 'assets/backgrounds/sinbad.png' },
     { name: 'Alice', health: 13, background: 'assets/backgrounds/alice.png' },
+    { name: 'Winter Soldier', health: 15, background: 'assets/backgrounds/winter-soldier.png' },
 
     // Unmatched: Robin Hood vs Bigfoot
     { name: 'Robin Hood', health: 14, sidekicks: [
