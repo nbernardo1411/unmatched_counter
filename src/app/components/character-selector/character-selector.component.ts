@@ -1,118 +1,78 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { Character } from '../../models/character.model';
-import { CharacterService } from '../../services/character.service';
+// app-character-selector.component.ts
+import { Component } from '@angular/core';
+import { CharacterService } from '../services/character.service';
+import { Character } from '../models/character.model';
 
 @Component({
   selector: 'app-character-selector',
-  templateUrl: './character-selector.component.html',
-  styleUrls: ['./character-selector.component.scss']
+  templateUrl: './app-character-selector.component.html',
 })
-export class CharacterSelectorComponent implements OnInit, OnDestroy {
+export class CharacterSelectorComponent {
   characters: Character[] = [];
-  selectedName: string | null = null;
-  private sub = new Subscription();
-
-  // form model for temporary character
+  selectedName = '';
   showCreate = false;
+
+  // form fields
   formName = '';
-  formHp = 10;
+  formHp = 0;
+  formHasEnrage = false; // new checkbox flag
 
-  // dynamic lists
-  sidekicks: { name: string; health: number }[] = [];
-  uniqueCounters: { type: string; start: number; max: number | null }[] = [];
+  sidekicks: Character[] = [];
+  uniqueCounters: any[] = [];
 
-  constructor(private characterService: CharacterService) {}
-
-  ngOnInit(): void {
-    console.log('CharacterSelectorComponent init'); // debug
+  constructor(private characterService: CharacterService) {
     this.characters = this.characterService.getCharacters();
-    this.sub.add(
-      this.characterService.selected$.subscribe(c => {
-        this.selectedName = c ? c.name : '';
-      })
-    );
   }
 
-  ngOnDestroy(): void {
-    this.sub.unsubscribe();
-  }
-
-  // select character from dropdown
-  selectByName(name: string): void {
-    if (!name) return;
-    const found = this.characters.find(c => c.name === name);
-    if (found) {
-      this.characterService.selectCharacter(found);
-    }
-  }
-
-  // trackBy for ngFor
-  trackByName(_: number, item: Character): string {
-    return item?.name ?? '';
-  }
-
-  // toggle form visibility
   toggleCreate(): void {
     this.showCreate = !this.showCreate;
   }
 
-  // add a new sidekick
   addSidekick(): void {
     this.sidekicks.push({ name: '', health: 1 });
   }
 
-  // remove sidekick by index
-  removeSidekick(index: number): void {
-    this.sidekicks.splice(index, 1);
+  removeSidekick(i: number): void {
+    this.sidekicks.splice(i, 1);
   }
 
-  // add a new unique counter
   addUniqueCounter(): void {
-    this.uniqueCounters.push({ type: '', start: 0, max: null });
+    this.uniqueCounters.push({ type: '', start: 0, max: 0 });
   }
 
-  // remove unique counter by index
-  removeUniqueCounter(index: number): void {
-    this.uniqueCounters.splice(index, 1);
+  removeUniqueCounter(j: number): void {
+    this.uniqueCounters.splice(j, 1);
   }
 
-  // create a new custom character
   createCustom(): void {
-    if (!this.formName) return;
+    const newChar: Character = {
+      name: this.formName,
+      health: this.formHp,
+      sidekicks: this.sidekicks,
+      uniqueCounter: this.uniqueCounters[0],
+      hasEnrage: this.formHasEnrage,
+      enraged: false,
+    };
+    this.characterService.addTemporaryCharacter(newChar);
+    this.resetForm();
+  }
 
-    // filter valid sidekicks (must have name)
-    const validSidekicks = this.sidekicks
-      .filter(s => s.name.trim() !== '')
-      .map(s => ({
-        name: s.name.trim(),
-        health: Math.max(0, Math.floor(s.health))
-      }));
-
-    // filter valid counters (must have type)
-    const validCounters = this.uniqueCounters
-      .filter(u => u.type.trim() !== '')
-      .map(u => ({
-        type: u.type.trim(),
-        start: Math.max(0, Math.floor(u.start)),
-        max: u.max ?? undefined,
-        description: ''
-      }));
-
-    const ch: Character = {
-      name: this.formName.trim(),
-      health: Math.max(0, Math.floor(this.formHp)),
-      sidekicks: validSidekicks.length ? validSidekicks : undefined,
-      uniqueCounter: validCounters.length ? validCounters[0] : undefined // use first counter only
-    } as any;
-
-    this.characterService.addTemporaryCharacter(ch);
-
-    // reset form
+  resetForm(): void {
     this.formName = '';
-    this.formHp = 10;
+    this.formHp = 0;
     this.sidekicks = [];
     this.uniqueCounters = [];
+    this.formHasEnrage = false;
     this.showCreate = false;
+  }
+
+  selectByName(name: string): void {
+    this.selectedName = name;
+    const char = this.characters.find(c => c.name === name);
+    if (char) this.characterService.selectCharacter(char);
+  }
+
+  trackByName(_: number, item: Character): string {
+    return item.name;
   }
 }
