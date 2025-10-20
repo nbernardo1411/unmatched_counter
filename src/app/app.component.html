@@ -6,6 +6,7 @@
   <!-- Floating User Guide FAB -->
   <button class="user-guide-fab" aria-label="Open user guide" (click)="openGuide()">?</button>
 
+
   <!-- User Guide Modal -->
   <div class="user-guide-overlay" *ngIf="showGuide">
     <div class="user-guide-modal">
@@ -36,6 +37,24 @@
           After saving, the new character will appear in the selector and can be added to
           matches like any other character.
         </p>
+      </section>
+
+      <!-- Feedback area (redirect to Gmail) -->
+      <section class="feedback-section">
+        <h3>Feedback</h3>
+        <p>Have suggestions or found a bug? Leave feedback and we'll review it.</p>
+
+        <div class="feedback-actions">
+          <button class="button small" (click)="onFeedbackClick()">Leave feedback</button>
+        </div>
+      </section>
+
+      <section *ngIf="showInstall" style="margin-top:12px;">
+        <h3>Install</h3>
+        <p>You can install this app to your device for a native-like experience.</p>
+        <div class="feedback-actions">
+          <button class="button small" (click)="promptInstall()">Install App</button>
+        </div>
       </section>
 
       <footer class="guide-footer">

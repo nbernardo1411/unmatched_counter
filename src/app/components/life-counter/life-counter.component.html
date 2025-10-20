@@ -39,5 +39,17 @@
       </div>
     </div>
 
+    <!-- toggles -->
+    <div class="toggles" *ngIf="selected?.toggles?.length">
+      <div class="toggle-row" *ngFor="let t of selected.toggles; let ti = index">
+        <div class="toggle-name">{{ t.name }}</div>
+        <label class="switch">
+          <input type="checkbox" [checked]="t.state" (change)="toggleToggle(ti)" />
+          <span class="slider"></span>
+        </label>
+        <div class="toggle-state">{{ t.state ? 'Yes' : 'No' }}</div>
+      </div>
+    </div>
+
   </div>
 </div>

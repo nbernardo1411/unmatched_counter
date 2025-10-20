@@ -38,6 +38,17 @@
       <input type="number" [(ngModel)]="formHp" min="0" />
     </label>
 
+    <label>
+      Background image (optional)
+      <input type="file" accept="image/*" (change)="onBackgroundFileChange($event)" />
+    </label>
+
+    <div class="bg-preview" *ngIf="formBackground">
+      <div class="bg-preview-label">Preview</div>
+      <img [src]="formBackground" alt="background preview" />
+    </div>
+  <div class="bg-loading" *ngIf="formBackgroundLoading">Processing image…</div>
+
     <!-- Sidekick Section -->
     <div class="sidekick-section">
       <h3>Sidekicks</h3>
@@ -61,8 +72,22 @@
       <button type="button" class="button small full-width" (click)="addUniqueCounter()">+ Add Counter</button>
     </div>
 
+    <!-- Toggles Section -->
+    <div class="toggles-section">
+      <h3>Toggles</h3>
+      <div *ngFor="let t of toggles; let k = index" class="toggle-row">
+        <input type="text" placeholder="Toggle name (e.g. Enrage state)" [(ngModel)]="t.name" />
+        <label class="switch">
+          <input type="checkbox" [(ngModel)]="t.state" />
+          <span class="slider"></span>
+        </label>
+        <button type="button" class="button small danger" (click)="removeToggle(k)">Remove</button>
+      </div>
+      <button type="button" class="button small full-width" (click)="addToggle()">+ Add Toggle</button>
+    </div>
+
     <div class="actions">
-      <button class="button full-width" (click)="createCustom()">Create</button>
+  <button class="button full-width" (click)="createCustom()" [disabled]="formBackgroundLoading">Create</button>
     </div>
   </div>
 </div>

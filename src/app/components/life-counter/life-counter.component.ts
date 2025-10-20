@@ -93,4 +93,14 @@ export class LifeCounterComponent implements OnInit, OnDestroy {
     if (!this.selected) return;
     this.characterService.adjustUniqueCounter(this.selected.name, -1);
   }
+
+  // flip a toggle on the selected character
+  toggleToggle(index: number): void {
+    if (!this.selected || !this.selected.toggles) return;
+    const t = this.selected.toggles[index];
+    if (!t) return;
+    t.state = !t.state;
+    // re-emit selected so templates bound to selected update
+    this.characterService.selectCharacter(this.selected);
+  }
 }

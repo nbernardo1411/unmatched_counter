@@ -6,6 +6,11 @@ export interface UniqueCounter {
   value?: number; // current runtime value (optional)
 }
 
+export interface ToggleState {
+  name: string;
+  state: boolean;
+}
+
 export interface Character {
   name: string;
   health: number;
@@ -15,4 +20,5 @@ export interface Character {
   background?: string;
   uniqueCounter?: UniqueCounter;
   hideHealth?: boolean; // optional flag to hide health display in UI
+  toggles?: ToggleState[];
 }

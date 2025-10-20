@@ -59,6 +59,10 @@ button:hover {
     padding: 20px;
     width: 90%;
     max-width: 700px;
+    /* Keep modal content scrollable on small screens */
+    max-height: calc(100vh - 80px);
+    overflow: auto;
+    -webkit-overflow-scrolling: touch; /* smooth scrolling on iOS */
     border-radius: 8px;
     box-shadow: 0 6px 24px rgba(0,0,0,0.6);
     border: 1px solid rgba(255,255,255,0.06);
@@ -83,6 +87,43 @@ button:hover {
     color: #bbb;
 }
 
+/* Make the modal scrollbar visible and usable across browsers */
+.user-guide-modal {
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: rgba(255,255,255,0.16) rgba(255,255,255,0.03);
+}
+
+.user-guide-modal::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+.user-guide-modal::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+}
+.user-guide-modal::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.14);
+    border-radius: 8px;
+    border: 2px solid rgba(0,0,0,0.16);
+}
+.user-guide-modal:hover::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.22); }
+
+/* On very small screens make modal use most of the viewport and reduce border-radius */
+@media (max-width: 420px) {
+    .user-guide-modal {
+        width: 98%;
+        max-width: none;
+        max-height: calc(100vh - 40px);
+        border-radius: 8px;
+        padding: 16px;
+    }
+    .user-guide-overlay {
+        align-items: flex-start; /* avoid vertical centering which can push modal below the fold */
+        padding-top: 20px;
+        padding-bottom: 20px;
+    }
+}
+
 .guide-footer {
     display: flex;
     justify-content: space-between;
@@ -93,6 +134,12 @@ button:hover {
 .guide-footer button {
     background-color: #dc3545;
 }
+
+.feedback-section {
+    margin-top: 12px;
+}
+
+.feedback-actions { margin-bottom: 8px; }
 
 /* Floating help FAB in bottom-right */
 .user-guide-fab {
@@ -119,6 +166,4 @@ button:hover {
 }
 
 /* slightly muted/greyscale aesthetic for modal text */
-.user-guide-modal {
-    color: #222; /* dark text on white background for readability */
-}
+/* modal text color is set above for dark modal */
