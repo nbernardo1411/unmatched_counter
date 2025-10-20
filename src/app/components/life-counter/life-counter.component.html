@@ -11,7 +11,7 @@
       <div class="title">{{ selected.name }}</div>
       <div class="hp-controls">
         <button class="button" (click)="dec(selected)">-</button>
-        <div class="health-points">{{ selected.health }}</div>
+        <div class="health-points" *ngIf="!selected.hideHealth">{{ selected.health }}</div>
         <button class="button" (click)="inc(selected)">+</button>
       </div>
     </div>
