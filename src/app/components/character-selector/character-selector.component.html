@@ -24,10 +24,32 @@
   <div class="create-form" *ngIf="showCreate">
     <label> Name <input type="text" [(ngModel)]="formName" /> </label>
     <label> HP <input type="number" [(ngModel)]="formHp" min="0" /> </label>
-    <label> Sidekicks (comma, Name:HP) <input type="text" [(ngModel)]="formSidekicks" placeholder="Hawk:2, Dog:1" /> </label>
-    <label> Unique type <input type="text" [(ngModel)]="formUniqueType" placeholder="Conductor" /> </label>
-    <label> Unique start <input type="number" [(ngModel)]="formUniqueStart" min="0" /> </label>
-    <label> Unique max <input type="number" [(ngModel)]="formUniqueMax" min="0" /> </label>
-    <div class="actions"><button class="button" (click)="createCustom()">Create</button></div>
+
+    <!-- Sidekick Section -->
+    <div class="sidekick-section">
+      <label>Sidekicks</label>
+      <div *ngFor="let s of sidekicks; let i = index" class="sidekick-row">
+        <input type="text" placeholder="Name" [(ngModel)]="s.name" />
+        <input type="number" placeholder="HP" min="1" [(ngModel)]="s.health" />
+        <button type="button" class="button small danger" (click)="removeSidekick(i)">Remove</button>
+      </div>
+      <button type="button" class="button small" (click)="addSidekick()">+ Add Sidekick</button>
+    </div>
+
+    <!-- Unique Counter Section -->
+    <div class="unique-section">
+      <label>Unique Counters</label>
+      <div *ngFor="let u of uniqueCounters; let j = index" class="unique-row">
+        <input type="text" placeholder="Type" [(ngModel)]="u.type" />
+        <input type="number" placeholder="Start" min="0" [(ngModel)]="u.start" />
+        <input type="number" placeholder="Max" min="0" [(ngModel)]="u.max" />
+        <button type="button" class="button small danger" (click)="removeUniqueCounter(j)">Remove</button>
+      </div>
+      <button type="button" class="button small" (click)="addUniqueCounter()">+ Add Counter</button>
+    </div>
+
+    <div class="actions">
+      <button class="button" (click)="createCustom()">Create</button>
+    </div>
   </div>
 </div>
