@@ -37,11 +37,14 @@ export class CharacterService {
     { name: 'Jekyll & Hyde', health: 16, background: 'assets/backgrounds/jekyll-hyde.png' },
       // Additional custom / promo characters
       { name: 'T. Rex', health: 27, background: 'assets/backgrounds/t-rex.png' },
-      { name: 'Raptors', sidekicks: [ 
-        { name: 'Blue', health: 6 },
-        { name: 'Delta', health: 6 },
-        { name: 'Echo', health: 6 },
-      ], background: 'assets/backgrounds/ingen-raptors.png' },
+      { name: 'Raptors', health: 6, 
+        hideHealth: true, 
+        sidekicks: [
+          { name: 'Blue', health: 6 },
+          { name: 'Delta', health: 6 },
+          { name: 'Echo', health: 6 },
+        ],
+        background: 'assets/backgrounds/ingen-raptors.png' },
       { name: 'Golden Bat', health: 18, background: 'assets/backgrounds/golden-bat.png' },
       { name: 'Bruce Lee', health: 14, background: 'assets/backgrounds/bruce-lee.png' },
       { name: 'Nikola Tesla', health: 16, background: 'assets/backgrounds/nikola-tesla.png', uniqueCounter: { type: 'Conductor', start: 3, max: 4, value: 3 } },
