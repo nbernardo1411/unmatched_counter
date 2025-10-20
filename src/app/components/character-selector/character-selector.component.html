@@ -61,6 +61,15 @@
       <button type="button" class="button small full-width" (click)="addUniqueCounter()">+ Add Counter</button>
     </div>
 
+      <!-- NEW: Enrage toggle -->
+  <div class="enrage-section">
+    <h3>Enrage Option</h3>
+    <label class="enrage-checkbox">
+      <input type="checkbox" [(ngModel)]="formHasEnrage" />
+      Enable Enrage toggle
+    </label>
+  </div>
+
     <div class="actions">
       <button class="button full-width" (click)="createCustom()">Create</button>
     </div>
