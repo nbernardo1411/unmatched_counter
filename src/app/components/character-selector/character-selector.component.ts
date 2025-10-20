@@ -12,14 +12,15 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
   characters: Character[] = [];
   selectedName: string | null = null;
   private sub = new Subscription();
+
   // form model for temporary character
   showCreate = false;
   formName = '';
   formHp = 10;
-  formSidekicks = ''; // comma separated "Name:HP,Name:HP"
-  formUniqueType = '';
-  formUniqueStart: number | null = null;
-  formUniqueMax: number | null = null;
+
+  // dynamic lists
+  sidekicks: { name: string; health: number }[] = [];
+  uniqueCounters: { type: string; start: number; max: number | null }[] = [];
 
   constructor(private characterService: CharacterService) {}
 
@@ -37,53 +38,81 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
     this.sub.unsubscribe();
   }
 
+  // select character from dropdown
   selectByName(name: string): void {
-    if (!name) {
-      return;
-    }
+    if (!name) return;
     const found = this.characters.find(c => c.name === name);
     if (found) {
       this.characterService.selectCharacter(found);
     }
   }
 
+  // trackBy for ngFor
   trackByName(_: number, item: Character): string {
     return item?.name ?? '';
   }
 
+  // toggle form visibility
   toggleCreate(): void {
     this.showCreate = !this.showCreate;
   }
 
+  // add a new sidekick
+  addSidekick(): void {
+    this.sidekicks.push({ name: '', health: 1 });
+  }
+
+  // remove sidekick by index
+  removeSidekick(index: number): void {
+    this.sidekicks.splice(index, 1);
+  }
+
+  // add a new unique counter
+  addUniqueCounter(): void {
+    this.uniqueCounters.push({ type: '', start: 0, max: null });
+  }
+
+  // remove unique counter by index
+  removeUniqueCounter(index: number): void {
+    this.uniqueCounters.splice(index, 1);
+  }
+
+  // create a new custom character
   createCustom(): void {
     if (!this.formName) return;
-    const sidekicks = this.parseSidekicks(this.formSidekicks);
+
+    // filter valid sidekicks (must have name)
+    const validSidekicks = this.sidekicks
+      .filter(s => s.name.trim() !== '')
+      .map(s => ({
+        name: s.name.trim(),
+        health: Math.max(0, Math.floor(s.health))
+      }));
+
+    // filter valid counters (must have type)
+    const validCounters = this.uniqueCounters
+      .filter(u => u.type.trim() !== '')
+      .map(u => ({
+        type: u.type.trim(),
+        start: Math.max(0, Math.floor(u.start)),
+        max: u.max ?? undefined,
+        description: ''
+      }));
+
     const ch: Character = {
-      name: this.formName,
+      name: this.formName.trim(),
       health: Math.max(0, Math.floor(this.formHp)),
-      sidekicks: sidekicks.length ? sidekicks : undefined,
-      uniqueCounter: this.formUniqueType ? { type: this.formUniqueType, start: this.formUniqueStart ?? 0, max: this.formUniqueMax ?? undefined, description: '' } : undefined
+      sidekicks: validSidekicks.length ? validSidekicks : undefined,
+      uniqueCounter: validCounters.length ? validCounters[0] : undefined // use first counter only
     } as any;
 
     this.characterService.addTemporaryCharacter(ch);
+
     // reset form
     this.formName = '';
     this.formHp = 10;
-    this.formSidekicks = '';
-    this.formUniqueType = '';
-    this.formUniqueStart = null;
-    this.formUniqueMax = null;
+    this.sidekicks = [];
+    this.uniqueCounters = [];
     this.showCreate = false;
-  }
-
-  private parseSidekicks(input: string): Character[] {
-    if (!input) return [];
-    return input.split(',').map(s => s.trim()).filter(Boolean).map(tok => {
-      // support either "Name" or "Name:HP"
-      const parts = tok.split(':').map(p => p.trim());
-      const name = parts[0];
-      const hp = parts[1] ? Math.max(0, Math.floor(Number(parts[1]) || 0)) : 1;
-      return { name, health: hp } as Character;
-    });
   }
 }
