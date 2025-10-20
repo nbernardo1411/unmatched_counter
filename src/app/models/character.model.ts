@@ -14,4 +14,5 @@ export interface Character {
   sidekicks?: Character[];
   background?: string;
   uniqueCounter?: UniqueCounter;
+  hideHealth?: boolean; // optional flag to hide health display in UI
 }
