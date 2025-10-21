@@ -1,8 +1,8 @@
 {
-  "name": "unmatched-health-angular",
-  "short_name": "unmatched-health-angular",
-  "theme_color": "#1976d2",
-  "background_color": "#fafafa",
+  "name": "Unmatched Virtual Dial (Health Counter)",
+  "short_name": "Unmatched Virtual Dial",
+  "theme_color": "#000000",
+  "background_color": "#000000",
   "display": "standalone",
   "scope": "./",
   "start_url": "./",
