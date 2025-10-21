@@ -1,0 +1,17 @@
+{
+  "name": "Unmatched Virtual Dial (Health Counter)",
+  "short_name": "Unmatched Virtual Dial",
+  "theme_color": "#000000",
+  "background_color": "#000000",
+  "display": "standalone",
+  "scope": "./",
+  "start_url": "./",
+  "icons": [
+    {
+      "src": "assets/icons/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ]
+}
