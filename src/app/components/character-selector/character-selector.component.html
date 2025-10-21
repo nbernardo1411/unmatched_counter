@@ -48,11 +48,6 @@
       Background image (optional)
       <input type="file" accept="image/*" (change)="onBackgroundFileChange($event)" />
     </label>
-
-    <div class="bg-preview" *ngIf="formBackground">
-      <div class="bg-preview-label">Preview</div>
-      <img [src]="formBackground" alt="background preview" />
-    </div>
   <div class="bg-loading" *ngIf="formBackgroundLoading">Processing image…</div>
 
     <!-- Sidekick Section -->
