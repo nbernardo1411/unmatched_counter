@@ -40,7 +40,7 @@ export class AppComponent {
     if (openGmail) {
       // prefill compose to kirigayazuki@gmail.com
       const toRaw = 'kirigayazuki@gmail.com';
-      const subjectRaw = 'App feedback from Unmatched Health App';
+      const subjectRaw = 'App feedback from Unmatched Health Counter App';
       const bodyRaw = 'Describe your feedback here...';
       const to = encodeURIComponent(toRaw);
       const subject = encodeURIComponent(subjectRaw);

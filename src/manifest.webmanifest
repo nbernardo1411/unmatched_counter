@@ -8,9 +8,9 @@
   "start_url": "./",
   "icons": [
     {
-      "src": "assets/icons/icon.webp",
+      "src": "assets/icons/icon.png",
       "sizes": "512x512",
-      "type": "image/webp",
+      "type": "image/png",
       "purpose": "maskable any"
     }
   ]
