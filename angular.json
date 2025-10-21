@@ -20,6 +20,7 @@
               "src/favicon.ico",
               "src/assets",
               "src/manifest.webmanifest",
+              "src/manifest.v2.webmanifest",
               "src/_redirects"
             ],
             "styles": [
@@ -76,7 +77,8 @@
             "assets": [
               "src/favicon.ico",
               "src/assets",
-              "src/manifest.webmanifest"
+              "src/manifest.webmanifest",
+              "src/manifest.v2.webmanifest"
             ],
             "styles": [
               "src/styles.scss"

@@ -28,9 +28,10 @@ export class AppComponent {
     // Listen for the beforeinstallprompt event and show an in-app Install button
     window.addEventListener('beforeinstallprompt', (e: Event) => {
       // Prevent the mini-infobar from appearing on mobile
-      e.preventDefault();
+      try { (e as any).preventDefault(); } catch {}
       this.deferredPrompt = e;
       this.showInstall = true;
+      console.log('beforeinstallprompt fired');
     });
   }
 
@@ -85,11 +86,15 @@ export class AppComponent {
 
   // Trigger the saved beforeinstallprompt event to show the browser install dialog
   async promptInstall(): Promise<void> {
-    if (!this.deferredPrompt) return;
+    if (!this.deferredPrompt) {
+      // Fallback: show instructions for manual install via the browser UI
+      alert('This browser did not provide an automatic install prompt. To install, open your browser menu and choose "Add to Home screen" or "Install app".');
+      return;
+    }
 
     try {
       // Show the native install prompt
-      this.deferredPrompt.prompt();
+      (this.deferredPrompt as any).prompt();
       const choiceResult = await (this.deferredPrompt as any).userChoice;
       // Optionally inspect choiceResult.outcome ('accepted'|'dismissed')
       this.showInstall = false;
