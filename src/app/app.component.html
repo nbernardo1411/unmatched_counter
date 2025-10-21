@@ -3,12 +3,6 @@
     <app-background-manager></app-background-manager>
   </main>
 
-  <!-- Floating User Guide FAB -->
-  <button class="user-guide-fab" aria-label="Open user guide" (click)="openGuide()">?</button>
-
-  
-
-
   <!-- User Guide Modal -->
   <div class="user-guide-overlay" *ngIf="showGuide">
     <div class="user-guide-modal">
@@ -51,7 +45,7 @@
         </div>
       </section>
 
-  <section style="margin-top:12px;">
+      <section style="margin-top:12px;" *ngIf="showInstall">
         <h3>Install</h3>
         <p>You can install this app to your device for a native-like experience.</p>
         <div class="feedback-actions">
