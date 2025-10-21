@@ -6,6 +6,7 @@ import { Character } from '../models/character.model';
   providedIn: 'root'
 })
 export class CharacterService {
+  private static CUSTOM_KEY = 'customCharacters';
   private characters: Character[] = [
     // Unmatched: Battle of Legends Vol. 1
     { name: 'King Arthur', health: 18, sidekicks: [{ name: 'Merlin', health: 7 }], background: 'assets/backgrounds/king-arthur.png' },
@@ -62,22 +63,30 @@ export class CharacterService {
       { name: 'Ancient Leshen', health: 13, sidekicks: [{ name: 'Wolf #1', health: 1 }, { name: 'Wolf #2', health: 1 }], background: 'assets/backgrounds/witcher.png'},
   ];
 
-  constructor() {
-    // Ensure every character and sidekick has a maxHealth initialized to their starting health
-    this.characters.forEach(ch => {
-      if (ch.maxHealth == null) ch.maxHealth = ch.health;
-      if (ch.sidekicks) {
-        ch.sidekicks.forEach(sk => {
-          if (sk.maxHealth == null) sk.maxHealth = sk.health;
-        });
+    constructor() {
+      // Load custom characters from Local Storage
+      const customRaw = localStorage.getItem(CharacterService.CUSTOM_KEY);
+      if (customRaw) {
+        try {
+          const customChars: Character[] = JSON.parse(customRaw);
+          customChars.forEach(ch => this.characters.push(ch));
+        } catch {}
       }
-      // initialize uniqueCounter value if present
-      if (ch.uniqueCounter && ch.uniqueCounter.value == null) {
-        ch.uniqueCounter.value = ch.uniqueCounter.start;
-        if (ch.uniqueCounter.max == null) ch.uniqueCounter.max = ch.uniqueCounter.start;
-      }
-    });
-  }
+      // Ensure every character and sidekick has a maxHealth initialized to their starting health
+      this.characters.forEach(ch => {
+        if (ch.maxHealth == null) ch.maxHealth = ch.health;
+        if (ch.sidekicks) {
+          ch.sidekicks.forEach(sk => {
+            if (sk.maxHealth == null) sk.maxHealth = sk.health;
+          });
+        }
+        // initialize uniqueCounter value if present
+        if (ch.uniqueCounter && ch.uniqueCounter.value == null) {
+          ch.uniqueCounter.value = ch.uniqueCounter.start;
+          if (ch.uniqueCounter.max == null) ch.uniqueCounter.max = ch.uniqueCounter.start;
+        }
+      });
+    }
 
   // Helper to adjust a character's unique counter (if present)
   adjustUniqueCounter(name: string, delta: number): void {
@@ -94,19 +103,49 @@ export class CharacterService {
   selected$ = this.selectedSubject.asObservable();
 
   getCharacters(): Character[] {
-    return this.characters;
+      return this.characters;
   }
 
-  // Add a temporary character at runtime (not persisted)
-  addTemporaryCharacter(ch: Character): void {
-    // initialize maxHealth for new temporary character and its sidekicks
-    if (ch.maxHealth == null) ch.maxHealth = ch.health;
-    if (ch.sidekicks) ch.sidekicks.forEach(sk => { if (sk.maxHealth == null) sk.maxHealth = sk.health; });
-    if (ch.uniqueCounter && ch.uniqueCounter.value == null) ch.uniqueCounter.value = ch.uniqueCounter.start;
-    this.characters.push(ch);
-    // emit new list by selecting the new character
-    this.selectedSubject.next(ch);
-  }
+    // Add a custom character and persist
+    addCustomCharacter(ch: Character): void {
+      if (ch.maxHealth == null) ch.maxHealth = ch.health;
+      if (ch.sidekicks) ch.sidekicks.forEach(sk => { if (sk.maxHealth == null) sk.maxHealth = sk.health; });
+      if (ch.uniqueCounter && ch.uniqueCounter.value == null) ch.uniqueCounter.value = ch.uniqueCounter.start;
+      this.characters.push(ch);
+      this.saveCustomCharacters();
+      this.selectedSubject.next(ch);
+    }
+
+    // Edit a custom character by name
+    editCustomCharacter(name: string, updated: Character): void {
+      const idx = this.characters.findIndex(c => c.name === name);
+      if (idx < 0) return;
+      this.characters[idx] = updated;
+      this.saveCustomCharacters();
+      this.selectedSubject.next(updated);
+    }
+
+    // Delete a custom character by name
+    deleteCustomCharacter(name: string): void {
+      const idx = this.characters.findIndex(c => c.name === name);
+      if (idx < 0) return;
+      const removed = this.characters.splice(idx, 1)[0];
+      this.saveCustomCharacters();
+      // If deleted character was selected, clear selection
+      if (this.getSelectedCharacter()?.name === name) {
+        this.selectedSubject.next(null);
+      }
+    }
+
+    // Save only custom characters to Local Storage
+    private saveCustomCharacters(): void {
+      // Custom characters are those not in the initial list (assume initial list is static)
+      const initialNames = [
+        'King Arthur','Medusa','Sinbad','Alice','Winter Soldier','Robin Hood','Bigfoot','Sherlock Holmes','Dracula','Invisible Man','Jekyll & Hyde','T. Rex','Raptors','Golden Bat','Bruce Lee','Nikola Tesla','Geralt of Rivia','Yennefer of Vengerberg','Ciri','Eredin','Ancient Leshen'
+      ];
+      const customChars = this.characters.filter(c => !initialNames.includes(c.name));
+      localStorage.setItem(CharacterService.CUSTOM_KEY, JSON.stringify(customChars));
+    }
 
   selectCharacter(character: Character): void {
     this.selectedSubject.next(character);

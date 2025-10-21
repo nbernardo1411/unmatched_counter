@@ -17,6 +17,12 @@
     <span class="select-decor" aria-hidden="true"></span>
   </div>
 
+  <!-- Show Edit/Delete only if selected character is custom -->
+  <div *ngIf="selectedName && getSelectedCharacter() && isCustomCharacter(getSelectedCharacter())" class="custom-actions">
+    <button class="button small" (click)="startEdit(getSelectedCharacter())">Edit</button>
+    <button class="button small danger" (click)="deleteCustom(getSelectedCharacter())">Delete</button>
+  </div>
+
   <p class="select-hint" *ngIf="!selectedName">
     Choose a character to show health, sidekicks and background.
   </p>
@@ -87,7 +93,7 @@
     </div>
 
     <div class="actions">
-  <button class="button full-width" (click)="createCustom()" [disabled]="formBackgroundLoading">Create</button>
+      <button class="button full-width" (click)="createCustom()" [disabled]="formBackgroundLoading">{{ editMode ? 'Save' : 'Create' }}</button>
     </div>
-  </div>
-</div>
+    </div>
+  <!-- End create-form -->
