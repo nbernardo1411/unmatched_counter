@@ -24,6 +24,7 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
   formBackground: string | null = null; // data URL for uploaded background image
   formBackgroundLoading = false;
   formBackgroundPreview: string | null = null; // fast object URL preview while processing
+  formBackgroundError: string | null = null;
   private lastFormBackgroundUrl: string | null = null;
 
   // edit mode
@@ -120,6 +121,8 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
 
   // handle background image file selection (reads as data URL)
   onBackgroundFileChange(evt: Event): void {
+    // clear previous error
+    this.formBackgroundError = null;
     const input = evt.target as HTMLInputElement;
     if (!input.files || input.files.length === 0) {
       if (this.lastFormBackgroundUrl) {
@@ -130,6 +133,19 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
       return;
     }
     const file = input.files[0];
+    // prevent very large uploads to avoid UI lag and storage issues
+    const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3 MB
+    if (file.size > MAX_FILE_SIZE) {
+      // cleanup any preview url
+      if (this.lastFormBackgroundUrl) {
+        try { URL.revokeObjectURL(this.lastFormBackgroundUrl); } catch { /* ignore */ }
+        this.lastFormBackgroundUrl = null;
+      }
+      this.formBackground = null;
+      this.formBackgroundError = 'File is too large. Maximum allowed size is 3 MB.';
+      this.formBackgroundLoading = false;
+      return;
+    }
     // If file is small already, read directly; otherwise resize & compress
     const MAX_DIMENSION = 1024; // max width/height in px
     const QUALITY = 0.78; // JPEG quality 0..1

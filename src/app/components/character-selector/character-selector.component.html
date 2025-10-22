@@ -49,6 +49,7 @@
       <input type="file" accept="image/*" (change)="onBackgroundFileChange($event)" />
     </label>
   <div class="bg-loading" *ngIf="formBackgroundLoading">Processing image…</div>
+  <div class="bg-error" *ngIf="formBackgroundError" role="alert">{{ formBackgroundError }}</div>
 
     <!-- Sidekick Section -->
     <div class="sidekick-section">
@@ -88,7 +89,7 @@
     </div>
 
     <div class="actions">
-      <button class="button full-width" (click)="createCustom()" [disabled]="formBackgroundLoading">{{ editMode ? 'Save' : 'Create' }}</button>
+      <button class="button full-width" (click)="createCustom()" [disabled]="formBackgroundLoading || !!formBackgroundError">{{ editMode ? 'Save' : 'Create' }}</button>
     </div>
     </div>
   <!-- End create-form -->
