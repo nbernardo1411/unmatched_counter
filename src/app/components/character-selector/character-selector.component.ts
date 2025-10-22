@@ -45,15 +45,15 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
         this.selectedName = c ? c.name : '';
       })
     );
-    // Restore temporary uploaded background (session-scoped) if present
+    // Restore temporary uploaded background (persist across PWA restarts)
     try {
-      const tmp = sessionStorage.getItem('tempFormBackground');
+      const tmp = localStorage.getItem('tempFormBackground');
       if (tmp) {
         this.formBackground = tmp;
         this.formBackgroundPreview = null;
       }
     } catch (_e) {
-      // ignore sessionStorage errors (e.g., disabled)
+      // ignore storage errors (e.g., disabled)
     }
   }
 
@@ -161,14 +161,15 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
         // this browser session.
         this.formBackground = finalUrl;
         this.lastFormBackgroundUrl = finalUrl;
-        // convert blob URL -> data URL and store temporarily
+        // convert blob URL -> data URL and store persistently so the PWA
+        // can restore the image across app restarts
         this.blobUrlToDataUrl(finalUrl)
           .then(dataUrl => {
             this.formBackground = dataUrl;
-            try { sessionStorage.setItem('tempFormBackground', dataUrl); } catch (_e) { /* ignore */ }
+            try { localStorage.setItem('tempFormBackground', dataUrl); } catch (_e) { /* ignore */ }
           })
           .catch(err => {
-            console.warn('Failed to persist image to sessionStorage', err);
+            console.warn('Failed to persist image to localStorage', err);
           });
   })
   .catch((err: any) => {
@@ -180,7 +181,7 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
           if (this.lastFormBackgroundUrl) try { URL.revokeObjectURL(this.lastFormBackgroundUrl); } catch {}
           this.lastFormBackgroundUrl = null;
           this.formBackground = reader.result as string;
-          try { sessionStorage.setItem('tempFormBackground', this.formBackground); } catch (_e) { /* ignore */ }
+          try { localStorage.setItem('tempFormBackground', this.formBackground); } catch (_e) { /* ignore */ }
         };
         reader.readAsDataURL(file);
       })
@@ -337,7 +338,7 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
   }
 
   // create a new custom character
-  createCustom(): void {
+  async createCustom(): Promise<void> {
     if (!this.formName) return;
     // filter valid sidekicks (must have name)
     const validSidekicks = this.sidekicks
@@ -361,9 +362,10 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
       sidekicks: validSidekicks.length ? validSidekicks : undefined,
       uniqueCounter: validCounters.length ? validCounters[0] : undefined // use first counter only
     } as any;
-    // include uploaded background if present
+    // ensure background is persisted as a data URL before saving
     if (this.formBackground) {
-      (ch as any).background = this.formBackground;
+      const persisted = await this.ensurePersistentBackground();
+      (ch as any).background = persisted ?? this.formBackground;
     }
     // include toggles if any
     const validToggles = this.toggles.filter(t => t.name.trim() !== '').map(t => ({ name: t.name.trim(), state: !!t.state }));
@@ -412,7 +414,22 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
     this.sidekicks = [];
     this.uniqueCounters = [];
     this.toggles = [];
-  try { sessionStorage.removeItem('tempFormBackground'); } catch (_e) { /* ignore */ }
+    try { localStorage.removeItem('tempFormBackground'); } catch (_e) { /* ignore */ }
+  }
+
+  // Ensure saving uses a persistent data URL if a blob URL is currently set
+  private async ensurePersistentBackground(): Promise<string | null> {
+    if (!this.formBackground) return null;
+    if (this.formBackground.startsWith('data:')) return this.formBackground;
+    try {
+      const dataUrl = await this.blobUrlToDataUrl(this.formBackground);
+      try { localStorage.setItem('tempFormBackground', dataUrl); } catch (_e) { /* ignore */ }
+      this.formBackground = dataUrl;
+      return dataUrl;
+    } catch (e) {
+      console.warn('Failed to convert blob URL to data URL before save', e);
+      return null;
+    }
   }
 }
 
