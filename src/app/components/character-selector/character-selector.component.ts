@@ -45,6 +45,16 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
         this.selectedName = c ? c.name : '';
       })
     );
+    // Restore temporary uploaded background (session-scoped) if present
+    try {
+      const tmp = sessionStorage.getItem('tempFormBackground');
+      if (tmp) {
+        this.formBackground = tmp;
+        this.formBackgroundPreview = null;
+      }
+    } catch (_e) {
+      // ignore sessionStorage errors (e.g., disabled)
+    }
   }
 
   ngOnDestroy(): void {
@@ -146,8 +156,20 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
           try { URL.revokeObjectURL(this.formBackgroundPreview); } catch { /* ignore */ }
         }
         this.formBackgroundPreview = null;
+        // keep blob/object URL for immediate display, then convert to a persistent
+        // data URL (base64) and save to sessionStorage so it survives reloads in
+        // this browser session.
         this.formBackground = finalUrl;
         this.lastFormBackgroundUrl = finalUrl;
+        // convert blob URL -> data URL and store temporarily
+        this.blobUrlToDataUrl(finalUrl)
+          .then(dataUrl => {
+            this.formBackground = dataUrl;
+            try { sessionStorage.setItem('tempFormBackground', dataUrl); } catch (_e) { /* ignore */ }
+          })
+          .catch(err => {
+            console.warn('Failed to persist image to sessionStorage', err);
+          });
   })
   .catch((err: any) => {
         console.error('Image processing failed', err);
@@ -158,12 +180,25 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
           if (this.lastFormBackgroundUrl) try { URL.revokeObjectURL(this.lastFormBackgroundUrl); } catch {}
           this.lastFormBackgroundUrl = null;
           this.formBackground = reader.result as string;
+          try { sessionStorage.setItem('tempFormBackground', this.formBackground); } catch (_e) { /* ignore */ }
         };
         reader.readAsDataURL(file);
       })
       .finally(() => {
         this.formBackgroundLoading = false;
       });
+  }
+
+  // Convert a blob: or object URL to a data URL (base64) so it can be stored as text
+  private blobUrlToDataUrl(url: string): Promise<string> {
+    return fetch(url)
+      .then(r => r.blob())
+      .then(blob => new Promise<string>((resolve, reject) => {
+        const fr = new FileReader();
+        fr.onload = () => resolve(fr.result as string);
+        fr.onerror = () => reject(new Error('Failed to read blob as data URL'));
+        fr.readAsDataURL(blob);
+      }));
   }
 
   // Resize & compress an image File to a JPEG data URL (returns Promise<string>)
@@ -377,6 +412,7 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
     this.sidekicks = [];
     this.uniqueCounters = [];
     this.toggles = [];
+  try { sessionStorage.removeItem('tempFormBackground'); } catch (_e) { /* ignore */ }
   }
 }
 
