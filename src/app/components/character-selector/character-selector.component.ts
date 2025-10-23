@@ -51,8 +51,27 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
     try {
       const tmp = localStorage.getItem('tempFormBackground');
       if (tmp) {
-        this.formBackground = tmp;
-        this.formBackgroundPreview = null;
+        if (tmp.startsWith('idb:')) {
+          // resolve idb key into an object URL
+          const key = tmp.slice(4);
+          ImageStore.createObjectUrl(key).then(obj => {
+            if (obj) {
+              this.formBackground = obj;
+              // remember mapping so we can revoke/cleanup later
+              this.lastFormBackgroundUrl = obj;
+            } else {
+              // fallback: keep the id ref but null preview
+              this.formBackground = null;
+            }
+            this.formBackgroundPreview = null;
+          }).catch(() => {
+            this.formBackground = null;
+            this.formBackgroundPreview = null;
+          });
+        } else {
+          this.formBackground = tmp;
+          this.formBackgroundPreview = null;
+        }
       }
     } catch (_e) {
       // ignore storage errors (e.g., disabled)
