@@ -432,8 +432,12 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
     this.showCreate = false;
     this.editMode = false;
     this.editOriginalName = null;
-    // Refresh character list
-    this.characters = this.characterService.getCharacters();
+    // Quick UX: inform the user and reload so the new character appears immediately
+    try {
+      alert('Character created and added to the list — reloading to update UI.');
+    } catch {}
+    // small timeout to allow UI to show the alert on some platforms
+    setTimeout(() => location.reload(), 150);
   }
 
   // Delete a custom character
