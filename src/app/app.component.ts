@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { ModalService } from './shared/modal.service';
 
 @Component({
   selector: 'app-root',
@@ -24,7 +25,7 @@ export class AppComponent {
 
   // Feedback redirect handled by onFeedbackClick()
 
-  constructor() {
+  constructor(private modal: ModalService) {
     // Listen for the beforeinstallprompt event and show an in-app Install button
     window.addEventListener('beforeinstallprompt', (e: Event) => {
       // Prevent the mini-infobar from appearing on mobile
@@ -36,8 +37,8 @@ export class AppComponent {
   }
 
   // When user clicks the Leave feedback button: ask whether to open Gmail.
-  onFeedbackClick(): void {
-    const openGmail = confirm('You will be redirected to Gmail to send feedback. Continue?');
+  async onFeedbackClick(): Promise<void> {
+    const openGmail = await this.modal.showConfirm('Send feedback', 'You will be redirected to Gmail to send feedback. Continue?');
     if (openGmail) {
       // prefill compose to kirigayazuki@gmail.com
       const toRaw = 'kirigayazuki@gmail.com';
@@ -81,14 +82,14 @@ export class AppComponent {
       }
       return;
     }
-  // user cancelled; do nothing
+    // user cancelled; do nothing
   }
 
   // Trigger the saved beforeinstallprompt event to show the browser install dialog
   async promptInstall(): Promise<void> {
     if (!this.deferredPrompt) {
       // Fallback: show instructions for manual install via the browser UI
-      alert('This browser did not provide an automatic install prompt. To install, open your browser menu and choose "Add to Home screen" or "Install app".');
+      await this.modal.showAlert('Install app', 'This browser did not provide an automatic install prompt. To install, open your browser menu and choose "Add to Home screen" or "Install app".');
       return;
     }
 

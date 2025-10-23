@@ -3,6 +3,7 @@ import { Subscription } from 'rxjs';
 import { Character } from '../../models/character.model';
 import { CharacterService } from '../../services/character.service';
 import { ImageStore } from '../../utils/image-store';
+import { ModalService } from '../../shared/modal.service';
 
 @Component({
   selector: 'app-character-selector',
@@ -43,7 +44,7 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
   uniqueCounters: { type: string; start: number; max: number | null }[] = [];
   toggles: { name: string; state: boolean }[] = [];
 
-  constructor(private characterService: CharacterService) {}
+  constructor(private characterService: CharacterService, private modal: ModalService) {}
 
   ngOnInit(): void {
     console.log('CharacterSelectorComponent init'); // debug
@@ -190,7 +191,7 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
     const file = input.files[0];
     // prevent very large uploads to avoid UI lag and storage issues
     const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3 MB
-    if (file.size > MAX_FILE_SIZE) {
+  if (file.size > MAX_FILE_SIZE) {
       // cleanup any preview url
       if (this.lastFormBackgroundUrl) {
         try { URL.revokeObjectURL(this.lastFormBackgroundUrl); } catch { /* ignore */ }
@@ -198,7 +199,7 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
       }
   this.formBackground = null;
   this.formBackgroundError = 'File is too large. Maximum allowed size is 3 MB.';
-  try { this.showAlert('Upload failed', 'File is too large. Maximum allowed size is 3 MB.'); } catch {}
+  try { this.modal.showAlert('Upload failed', 'File is too large. Maximum allowed size is 3 MB.'); } catch {}
       this.formBackgroundLoading = false;
       return;
     }
@@ -247,7 +248,7 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
           this.formBackground = await ImageStore.createObjectUrl(key) || finalUrl;
           } catch (e) {
           console.warn('Failed to persist image in IDB, falling back to data URL', e);
-          try { this.showAlert('Storage warning', 'Failed to persist image to local storage. The image will still be used in this session.'); } catch {}
+          try { this.modal.showAlert('Storage warning', 'Failed to persist image to local storage. The image will still be used in this session.'); } catch {}
           // fallback: convert to data URL and store in localStorage
           try {
             const dataUrl = await this.blobUrlToDataUrl(finalUrl);
@@ -255,7 +256,7 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
             try { localStorage.setItem('tempFormBackground', dataUrl); } catch (_e) { /* ignore */ }
           } catch (err) {
             console.warn('blob->dataUrl fallback failed', err);
-            try { this.showAlert('Error', 'Failed to convert image for storage. You may need to choose a smaller image.'); } catch {}
+            try { this.modal.showAlert('Error', 'Failed to convert image for storage. You may need to choose a smaller image.'); } catch {}
           }
         }
       })
@@ -269,7 +270,7 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
           this.lastFormBackgroundUrl = null;
           this.formBackground = reader.result as string;
           try { localStorage.setItem('tempFormBackground', this.formBackground); } catch (_e) { /* ignore */ }
-          try { this.showAlert('Processing note', 'Image processing failed; using the original file as a fallback.'); } catch {}
+            try { this.modal.showAlert('Processing note', 'Image processing failed; using the original file as a fallback.'); } catch {}
         };
         reader.readAsDataURL(file);
       })
@@ -473,7 +474,7 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
     this.editOriginalName = null;
     // Quick UX: inform the user and reload so the new character appears immediately
     try {
-      await this.showAlert(this.editMode ? 'Updated' : 'Created', this.editMode ? 'Character updated successfully — reloading to update UI.' : 'Character created and added to the list — reloading to update UI.');
+      await this.modal.showAlert(this.editMode ? 'Updated' : 'Created', this.editMode ? 'Character updated successfully — reloading to update UI.' : 'Character created and added to the list — reloading to update UI.');
     } catch {}
     // small timeout to allow UI to show the alert on some platforms
     setTimeout(() => location.reload(), 150);
@@ -482,7 +483,7 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
   // Delete a custom character
   deleteCustom(character: Character): void {
     if (!this.isCustomCharacter(character)) return;
-    this.showConfirm('Delete character', `Delete custom character "${character.name}"? This cannot be undone.`).then(yes => {
+  this.modal.showConfirm('Delete character', `Delete custom character "${character.name}"? This cannot be undone.`).then(yes => {
       if (!yes) return;
       this.characterService.deleteCustomCharacter(character.name);
       this.characters = this.characterService.getCharacters();
