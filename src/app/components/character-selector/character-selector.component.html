@@ -93,3 +93,15 @@
     </div>
     </div>
   <!-- End create-form -->
+
+  <!-- Modal for alerts/confirms -->
+  <div class="modal-backdrop" *ngIf="modalVisible">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <h2 id="modalTitle">{{ modalTitle }}</h2>
+      <div class="modal-body">{{ modalMessage }}</div>
+      <div class="modal-actions">
+        <button class="button" (click)="onModalCancel()" *ngIf="modalHasCancel">Cancel</button>
+        <button class="button primary" (click)="onModalConfirm()">OK</button>
+      </div>
+    </div>
+  </div>

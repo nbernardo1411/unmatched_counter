@@ -27,6 +27,12 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
   formBackgroundPreview: string | null = null; // fast object URL preview while processing
   formBackgroundError: string | null = null;
   private lastFormBackgroundUrl: string | null = null;
+  // Modal state for custom alerts/confirms
+  modalVisible = false;
+  modalTitle = '';
+  modalMessage = '';
+  modalHasCancel = false;
+  private modalResolve: ((v: boolean) => void) | null = null;
 
   // edit mode
   editMode = false;
@@ -76,6 +82,35 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
     } catch (_e) {
       // ignore storage errors (e.g., disabled)
     }
+  }
+
+  // Modal helpers
+  showAlert(title: string, message: string): Promise<void> {
+    return new Promise(resolve => {
+      this.modalTitle = title;
+      this.modalMessage = message;
+      this.modalHasCancel = false;
+      this.modalVisible = true;
+      this.modalResolve = (v: boolean) => { this.modalVisible = false; this.modalResolve = null; resolve(); };
+    });
+  }
+
+  showConfirm(title: string, message: string): Promise<boolean> {
+    return new Promise(resolve => {
+      this.modalTitle = title;
+      this.modalMessage = message;
+      this.modalHasCancel = true;
+      this.modalVisible = true;
+      this.modalResolve = (v: boolean) => { this.modalVisible = false; this.modalResolve = null; resolve(v); };
+    });
+  }
+
+  onModalConfirm(): void {
+    if (this.modalResolve) this.modalResolve(true);
+  }
+
+  onModalCancel(): void {
+    if (this.modalResolve) this.modalResolve(false);
   }
 
   ngOnDestroy(): void {
@@ -161,8 +196,9 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
         try { URL.revokeObjectURL(this.lastFormBackgroundUrl); } catch { /* ignore */ }
         this.lastFormBackgroundUrl = null;
       }
-      this.formBackground = null;
-      this.formBackgroundError = 'File is too large. Maximum allowed size is 3 MB.';
+  this.formBackground = null;
+  this.formBackgroundError = 'File is too large. Maximum allowed size is 3 MB.';
+  try { this.showAlert('Upload failed', 'File is too large. Maximum allowed size is 3 MB.'); } catch {}
       this.formBackgroundLoading = false;
       return;
     }
@@ -209,8 +245,9 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
           try { localStorage.setItem('tempFormBackground', idRef); } catch (_e) { /* ignore */ }
           // set formBackground to an object URL for immediate use (prefix kept as idb: in storage)
           this.formBackground = await ImageStore.createObjectUrl(key) || finalUrl;
-        } catch (e) {
+          } catch (e) {
           console.warn('Failed to persist image in IDB, falling back to data URL', e);
+          try { this.showAlert('Storage warning', 'Failed to persist image to local storage. The image will still be used in this session.'); } catch {}
           // fallback: convert to data URL and store in localStorage
           try {
             const dataUrl = await this.blobUrlToDataUrl(finalUrl);
@@ -218,6 +255,7 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
             try { localStorage.setItem('tempFormBackground', dataUrl); } catch (_e) { /* ignore */ }
           } catch (err) {
             console.warn('blob->dataUrl fallback failed', err);
+            try { this.showAlert('Error', 'Failed to convert image for storage. You may need to choose a smaller image.'); } catch {}
           }
         }
       })
@@ -231,6 +269,7 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
           this.lastFormBackgroundUrl = null;
           this.formBackground = reader.result as string;
           try { localStorage.setItem('tempFormBackground', this.formBackground); } catch (_e) { /* ignore */ }
+          try { this.showAlert('Processing note', 'Image processing failed; using the original file as a fallback.'); } catch {}
         };
         reader.readAsDataURL(file);
       })
@@ -434,7 +473,7 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
     this.editOriginalName = null;
     // Quick UX: inform the user and reload so the new character appears immediately
     try {
-      alert('Character created and added to the list — reloading to update UI.');
+      await this.showAlert(this.editMode ? 'Updated' : 'Created', this.editMode ? 'Character updated successfully — reloading to update UI.' : 'Character created and added to the list — reloading to update UI.');
     } catch {}
     // small timeout to allow UI to show the alert on some platforms
     setTimeout(() => location.reload(), 150);
@@ -443,7 +482,8 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
   // Delete a custom character
   deleteCustom(character: Character): void {
     if (!this.isCustomCharacter(character)) return;
-    if (confirm(`Delete custom character "${character.name}"? This cannot be undone.`)) {
+    this.showConfirm('Delete character', `Delete custom character "${character.name}"? This cannot be undone.`).then(yes => {
+      if (!yes) return;
       this.characterService.deleteCustomCharacter(character.name);
       this.characters = this.characterService.getCharacters();
       // If editing this character, reset form
@@ -453,7 +493,7 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
         this.editMode = false;
         this.editOriginalName = null;
       }
-    }
+    });
   }
 
   // Reset form fields
