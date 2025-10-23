@@ -129,18 +129,45 @@ export class CharacterService {
       if (ch.maxHealth == null) ch.maxHealth = ch.health;
       if (ch.sidekicks) ch.sidekicks.forEach(sk => { if (sk.maxHealth == null) sk.maxHealth = sk.health; });
       if (ch.uniqueCounter && ch.uniqueCounter.value == null) ch.uniqueCounter.value = ch.uniqueCounter.start;
-      this.characters.push(ch);
-      this.saveCustomCharacters();
-      this.selectedSubject.next(ch);
+      // If the background is an idb: reference, resolve it to an object URL
+      (async () => {
+        const bg = (ch as any).background as string | undefined;
+        if (bg && typeof bg === 'string' && bg.startsWith('idb:')) {
+          const key = bg.slice(4);
+          try {
+            const obj = await ImageStore.createObjectUrl(key);
+            if (obj) {
+              (ch as any).background = obj as any;
+              this.objectUrlToIdbKey.set(obj, key);
+            }
+          } catch {}
+        }
+        this.characters.push(ch);
+        this.saveCustomCharacters();
+        this.selectedSubject.next(ch);
+      })();
     }
 
     // Edit a custom character by name
     editCustomCharacter(name: string, updated: Character): void {
       const idx = this.characters.findIndex(c => c.name === name);
       if (idx < 0) return;
-      this.characters[idx] = updated;
-      this.saveCustomCharacters();
-      this.selectedSubject.next(updated);
+      (async () => {
+        const bg = (updated as any).background as string | undefined;
+        if (bg && typeof bg === 'string' && bg.startsWith('idb:')) {
+          const key = bg.slice(4);
+          try {
+            const obj = await ImageStore.createObjectUrl(key);
+            if (obj) {
+              (updated as any).background = obj as any;
+              this.objectUrlToIdbKey.set(obj, key);
+            }
+          } catch {}
+        }
+        this.characters[idx] = updated;
+        this.saveCustomCharacters();
+        this.selectedSubject.next(updated);
+      })();
     }
 
     // Delete a custom character by name
