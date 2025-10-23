@@ -1,12 +1,16 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Character } from '../models/character.model';
+import { ImageStore } from '../utils/image-store';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CharacterService {
   private static CUSTOM_KEY = 'customCharacters';
+  // Map object URLs created from IDB blobs back to their IDB key so we can
+  // serialize the id reference instead of the transient blob: URL.
+  private objectUrlToIdbKey = new Map<string, string>();
   private characters: Character[] = [
     // Unmatched: Battle of Legends Vol. 1
     { name: 'King Arthur', health: 18, sidekicks: [{ name: 'Merlin', health: 7 }], background: 'assets/backgrounds/king-arthur.png' },
@@ -69,7 +73,21 @@ export class CharacterService {
       if (customRaw) {
         try {
           const customChars: Character[] = JSON.parse(customRaw);
-          customChars.forEach(ch => this.characters.push(ch));
+          customChars.forEach(ch => {
+            // push immediately; if background is an idb:KEY we'll resolve it async
+            this.characters.push(ch);
+            if (ch.background && typeof ch.background === 'string' && ch.background.startsWith('idb:')) {
+              const key = ch.background.slice(4);
+              // resolve into an object URL for immediate UI use
+              ImageStore.createObjectUrl(key).then(objUrl => {
+                if (objUrl) {
+                  // remember mapping so we can persist the idb:KEY later
+                  this.objectUrlToIdbKey.set(objUrl, key);
+                  ch.background = objUrl as any;
+                }
+              }).catch(() => {});
+            }
+          });
         } catch {}
       }
       // Ensure every character and sidekick has a maxHealth initialized to their starting health
@@ -135,6 +153,21 @@ export class CharacterService {
       if (this.getSelectedCharacter()?.name === name) {
         this.selectedSubject.next(null);
       }
+      // If removed character referenced an IDB image, try to clean it up
+      try {
+        const bg = (removed as any).background as string | undefined;
+        if (bg && bg.startsWith('blob:')) {
+          const key = this.objectUrlToIdbKey.get(bg);
+          if (key) {
+            ImageStore.delete(key).catch(()=>{});
+            this.objectUrlToIdbKey.delete(bg);
+          }
+        }
+        if (bg && bg.startsWith('idb:')) {
+          const key = bg.slice(4);
+          ImageStore.delete(key).catch(()=>{});
+        }
+      } catch {}
     }
 
     // Save only custom characters to Local Storage
@@ -143,7 +176,15 @@ export class CharacterService {
       const initialNames = [
         'King Arthur','Medusa','Sinbad','Alice','Winter Soldier','Robin Hood','Bigfoot','Sherlock Holmes','Dracula','Invisible Man','Jekyll & Hyde','T. Rex','Raptors','Golden Bat','Bruce Lee','Nikola Tesla','Geralt of Rivia','Yennefer of Vengerberg','Ciri','Eredin','Ancient Leshen'
       ];
-      const customChars = this.characters.filter(c => !initialNames.includes(c.name));
+      const customChars = this.characters.filter(c => !initialNames.includes(c.name)).map(c => {
+        const copy: any = { ...c } as any;
+        // If background is an object URL we may have a mapping to an IDB key.
+        if (copy.background && typeof copy.background === 'string' && copy.background.startsWith('blob:')) {
+          const mapped = this.objectUrlToIdbKey.get(copy.background as string);
+          if (mapped) copy.background = `idb:${mapped}`;
+        }
+        return copy;
+      });
       localStorage.setItem(CharacterService.CUSTOM_KEY, JSON.stringify(customChars));
     }
 

@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { Character } from '../../models/character.model';
 import { CharacterService } from '../../services/character.service';
+import { ImageStore } from '../../utils/image-store';
 
 @Component({
   selector: 'app-character-selector',
@@ -166,29 +167,42 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
 
     // process image asynchronously (non-blocking) and replace preview with compressed blob URL
     this.processImageFileToBlobUrl(file, MAX_DIMENSION, QUALITY)
-      .then(finalUrl => {
+      .then(async finalUrl => {
         // revoke previous preview URL if it was an object URL and different
         if (this.formBackgroundPreview && this.formBackgroundPreview !== finalUrl) {
           try { URL.revokeObjectURL(this.formBackgroundPreview); } catch { /* ignore */ }
         }
         this.formBackgroundPreview = null;
-        // keep blob/object URL for immediate display, then convert to a persistent
-        // data URL (base64) and save to sessionStorage so it survives reloads in
-        // this browser session.
+        // keep blob/object URL for immediate display
         this.formBackground = finalUrl;
         this.lastFormBackgroundUrl = finalUrl;
-        // convert blob URL -> data URL and store persistently so the PWA
-        // can restore the image across app restarts
-        this.blobUrlToDataUrl(finalUrl)
-          .then(dataUrl => {
+
+        // Persist the underlying blob in IndexedDB and store an ID reference instead
+        try {
+          // fetch blob from blob URL
+          const resp = await fetch(finalUrl);
+          const blob = await resp.blob();
+          // generate a short unique key
+          const key = 'img_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
+          await ImageStore.put(key, blob);
+          // store a marker in localStorage so UI can restore preview across restarts: use idb:KEY
+          const idRef = `idb:${key}`;
+          try { localStorage.setItem('tempFormBackground', idRef); } catch (_e) { /* ignore */ }
+          // set formBackground to an object URL for immediate use (prefix kept as idb: in storage)
+          this.formBackground = await ImageStore.createObjectUrl(key) || finalUrl;
+        } catch (e) {
+          console.warn('Failed to persist image in IDB, falling back to data URL', e);
+          // fallback: convert to data URL and store in localStorage
+          try {
+            const dataUrl = await this.blobUrlToDataUrl(finalUrl);
             this.formBackground = dataUrl;
             try { localStorage.setItem('tempFormBackground', dataUrl); } catch (_e) { /* ignore */ }
-          })
-          .catch(err => {
-            console.warn('Failed to persist image to localStorage', err);
-          });
-  })
-  .catch((err: any) => {
+          } catch (err) {
+            console.warn('blob->dataUrl fallback failed', err);
+          }
+        }
+      })
+      .catch((err: any) => {
         console.error('Image processing failed', err);
         // fallback: read raw file as data URL (this may be slower but works)
         const reader = new FileReader();
@@ -436,14 +450,28 @@ export class CharacterSelectorComponent implements OnInit, OnDestroy {
   // Ensure saving uses a persistent data URL if a blob URL is currently set
   private async ensurePersistentBackground(): Promise<string | null> {
     if (!this.formBackground) return null;
+    // If already a data URL, return as-is
     if (this.formBackground.startsWith('data:')) return this.formBackground;
+    // If it's a blob/object URL and we previously persisted it into IDB,
+    // prefer returning an idb:KEY reference so saved characters stay small.
     try {
-      const dataUrl = await this.blobUrlToDataUrl(this.formBackground);
-      try { localStorage.setItem('tempFormBackground', dataUrl); } catch (_e) { /* ignore */ }
-      this.formBackground = dataUrl;
-      return dataUrl;
+      // Try to find an existing IDB key by checking localStorage tempFormBackground
+      const tmp = localStorage.getItem('tempFormBackground');
+      if (tmp && tmp.startsWith('idb:')) {
+        return tmp; // return idb:KEY and let CharacterService handle resolving
+      }
+      // Otherwise, convert the blob URL to a blob and store it in IDB now
+      const resp = await fetch(this.formBackground);
+      const blob = await resp.blob();
+      const key = 'img_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
+      await ImageStore.put(key, blob);
+      const idRef = `idb:${key}`;
+      try { localStorage.setItem('tempFormBackground', idRef); } catch (_e) { /* ignore */ }
+      // update current formBackground to an object URL for immediate use
+      this.formBackground = await ImageStore.createObjectUrl(key) || this.formBackground;
+      return idRef;
     } catch (e) {
-      console.warn('Failed to convert blob URL to data URL before save', e);
+      console.warn('Failed to convert blob URL to IDB before save', e);
       return null;
     }
   }
